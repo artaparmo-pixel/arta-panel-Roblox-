@@ -1,0 +1,28 @@
+local player = game.Players.LocalPlayer
+local char = player.Character or player.CharacterAdded:Wait()
+local humanoid = char:WaitForChild("Humanoid")
+local mouse = player:GetMouse()
+local root = char:WaitForChild("HumanoidRootPart")
+
+-- SETUP ANIMATION
+local anim = Instance.new("Animation")
+anim.AnimationId = "rbxassetid://184574340"
+local animator = humanoid:FindFirstChildOfClass("Animator") or humanoid
+local swingTrack = animator:LoadAnimation(anim)
+
+local isAttacking = false
+
+mouse.Button1Down:Connect(function()
+    if not humanoid or humanoid.Health <= 0 then return end
+    if isAttacking then return end
+    isAttacking = true
+
+    -- پخش انیمیشن زدن با سرعت 4 برابر
+    swingTrack:Play()
+    swingTrack:AdjustSpeed(4)
+
+    -- مدت زمان انیمیشن (0.3 ثانیه)
+    task.wait(0.3)
+
+    isAttacking = false
+end)
