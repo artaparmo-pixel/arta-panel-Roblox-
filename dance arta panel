@@ -1,0 +1,571 @@
+-- ============================================
+-- پک دنس ارتا (نسخه کامل - همه چیز اسکی شده)
+-- ============================================
+local player = game.Players.LocalPlayer
+local gui = Instance.new("ScreenGui")
+gui.Name = "ArtaDancePack"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local SoundService = game:GetService("SoundService")
+local Lighting = game:GetService("Lighting")
+
+-- ============================================
+-- صدای کلیک
+-- ============================================
+local function playClickSound()
+    local sound = Instance.new("Sound")
+    sound.SoundId = "rbxassetid://6895079853"
+    sound.Volume = 0.5
+    sound.Parent = SoundService
+    sound:Play()
+    task.spawn(function()
+        sound.Ended:Wait()
+        sound:Destroy()
+    end)
+end
+
+-- ============================================
+-- Frame اصلی
+-- ============================================
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 200, 0, 400)
+frame.Position = UDim2.new(0.5, -100, 0.5, -200)
+frame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+frame.BackgroundTransparency = 0.1
+frame.BorderSizePixel = 0
+frame.Parent = gui
+
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 14)
+corner.Parent = frame
+
+local frameStroke = Instance.new("UIStroke")
+frameStroke.Color = Color3.fromRGB(0, 170, 255)
+frameStroke.Thickness = 2
+frameStroke.Parent = frame
+
+local frameGradient = Instance.new("UIGradient")
+frameGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(25, 25, 35)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(45, 25, 65))
+})
+frameGradient.Rotation = 45
+frameGradient.Parent = frame
+
+-- ============================================
+-- Drag Bar
+-- ============================================
+local dragBar = Instance.new("Frame")
+dragBar.Size = UDim2.new(1, 0, 0, 35)
+dragBar.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
+dragBar.BorderSizePixel = 0
+dragBar.Parent = frame
+
+local dragCorner = Instance.new("UICorner")
+dragCorner.CornerRadius = UDim.new(0, 14)
+dragCorner.Parent = dragBar
+
+local dragFix = Instance.new("Frame")
+dragFix.Size = UDim2.new(1, 0, 0, 12)
+dragFix.Position = UDim2.new(0, 0, 1, -12)
+dragFix.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
+dragFix.BorderSizePixel = 0
+dragFix.Parent = dragBar
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, -60, 1, 0)
+title.BackgroundTransparency = 1
+title.Text = "پک دنس ارتا"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 15
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Position = UDim2.new(0, 12, 0, 0)
+title.Parent = dragBar
+
+-- دکمه Collapse
+local toggleBtn = Instance.new("TextButton")
+toggleBtn.Size = UDim2.new(0, 24, 0, 24)
+toggleBtn.Position = UDim2.new(1, -58, 0, 6)
+toggleBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 90)
+toggleBtn.Text = "▲"
+toggleBtn.Font = Enum.Font.GothamBold
+toggleBtn.TextSize = 12
+toggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleBtn.BorderSizePixel = 0
+toggleBtn.Parent = dragBar
+
+local crnToggle = Instance.new("UICorner")
+crnToggle.CornerRadius = UDim.new(0, 6)
+crnToggle.Parent = toggleBtn
+
+-- دکمه بستن
+local closeBtn = Instance.new("TextButton")
+closeBtn.Size = UDim2.new(0, 24, 0, 24)
+closeBtn.Position = UDim2.new(1, -30, 0, 6)
+closeBtn.BackgroundColor3 = Color3.fromRGB(220, 50, 50)
+closeBtn.Text = "✕"
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextSize = 12
+closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeBtn.BorderSizePixel = 0
+closeBtn.Parent = dragBar
+
+local crnClose = Instance.new("UICorner")
+crnClose.CornerRadius = UDim.new(0, 6)
+crnClose.Parent = closeBtn
+
+closeBtn.MouseButton1Click:Connect(function()
+    playClickSound()
+    gui:Destroy()
+end)
+
+-- ============================================
+-- Drag
+-- ============================================
+local dragging, dragStart, startPos
+local function update(input)
+    local delta = input.Position - dragStart
+    frame.Position = UDim2.new(
+        startPos.X.Scale, startPos.X.Offset + delta.X,
+        startPos.Y.Scale, startPos.Y.Offset + delta.Y
+    )
+end
+
+dragBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = frame.Position
+    end
+end)
+
+dragBar.InputChanged:Connect(function(input)
+    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        update(input)
+    end
+end)
+
+UIS.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = false
+    end
+end)
+
+-- ============================================
+-- Scroll
+-- ============================================
+local scroll = Instance.new("ScrollingFrame")
+scroll.Size = UDim2.new(1, -14, 1, -45)
+scroll.Position = UDim2.new(0, 7, 0, 40)
+scroll.ScrollBarThickness = 4
+scroll.ScrollBarImageColor3 = Color3.fromRGB(0, 170, 255)
+scroll.BackgroundTransparency = 1
+scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+scroll.Parent = frame
+
+local layout = Instance.new("UIListLayout")
+layout.Padding = UDim.new(0, 5)
+layout.SortOrder = Enum.SortOrder.LayoutOrder
+layout.Parent = scroll
+
+local buttonHeight = 30
+
+-- ============================================
+-- داده‌ها
+-- ============================================
+local toggleData = {}
+local animationTracks = {}
+local allDances = {}
+
+local function getHumanoidSafe()
+    local char = player.Character or player.CharacterAdded:Wait()
+    return char:WaitForChild("Humanoid"), char
+end
+
+local function resetAllToggles(exceptName)
+    for name, data in pairs(toggleData) do
+        if name ~= exceptName and data.isActive then
+            data.isActive = false
+            data.button.Text = name.." | خاموش"
+            data.button.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+            if animationTracks[name] then
+                for _, track in ipairs(animationTracks[name]) do
+                    track:Stop(0.2)
+                end
+            end
+        end
+    end
+end
+
+-- ============================================
+-- ساخت Toggle
+-- ============================================
+local orderCounter = 100
+
+local function createToggleButton(name, animationData, speed)
+    orderCounter = orderCounter + 1
+    toggleData[name] = {isActive = false}
+    animationTracks[name] = {}
+
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, -6, 0, buttonHeight)
+    btn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+    btn.Text = name.." | خاموش"
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Font = Enum.Font.GothamMedium
+    btn.TextSize = 13
+    btn.BorderSizePixel = 0
+    btn.LayoutOrder = orderCounter
+    btn.Parent = scroll
+
+    toggleData[name].button = btn
+
+    local crn = Instance.new("UICorner")
+    crn.CornerRadius = UDim.new(0, 6)
+    crn.Parent = btn
+
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(0, 170, 255)
+    stroke.Thickness = 1
+    stroke.Transparency = 0.5
+    stroke.Parent = btn
+
+    btn.MouseButton1Click:Connect(function()
+        playClickSound()
+        local data = toggleData[name]
+        data.isActive = not data.isActive
+
+        local humanoid, char = getHumanoidSafe()
+        local animator = humanoid:FindFirstChildOfClass("Animator") or humanoid
+
+        if data.isActive then
+            resetAllToggles(name)
+            btn.Text = name.." | روشن"
+            btn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+
+            local ids = type(animationData) == "table" and animationData or {animationData}
+            animationTracks[name] = {}
+for _, id in ipairs(ids) do
+                local anim = Instance.new("Animation")
+                anim.AnimationId = id
+                local success, track = pcall(function()
+                    return animator:LoadAnimation(anim)
+                end)
+                if success and track then
+                    track.Priority = Enum.AnimationPriority.Action4
+                    track.Looped = true
+                    table.insert(animationTracks[name], track)
+                    track:Play()
+                    track:AdjustSpeed(speed)
+                end
+            end
+        else
+            btn.Text = name.." | خاموش"
+            btn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+            if animationTracks[name] then
+                for _, track in ipairs(animationTracks[name]) do
+                    track:Stop(0.2)
+                end
+            end
+        end
+    end)
+end
+
+-- ============================================
+-- استوپ دنس
+-- ============================================
+local function createStopButton()
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, -6, 0, buttonHeight + 4)
+    btn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
+    btn.Text = "استوپ دنس"
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 14
+    btn.BorderSizePixel = 0
+    btn.LayoutOrder = 1
+    btn.Parent = scroll
+
+    local crn = Instance.new("UICorner")
+    crn.CornerRadius = UDim.new(0, 6)
+    crn.Parent = btn
+
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(255, 80, 80)
+    stroke.Thickness = 2
+    stroke.Parent = btn
+
+    btn.MouseButton1Click:Connect(function()
+        playClickSound()
+        resetAllToggles()
+        TweenService:Create(frame, TweenInfo.new(0.15), {
+            BackgroundColor3 = Color3.fromRGB(80, 20, 20)
+        }):Play()
+        task.wait(0.15)
+        TweenService:Create(frame, TweenInfo.new(0.3), {
+            BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+        }):Play()
+    end)
+end
+
+-- ============================================
+-- دنس رندوم
+-- ============================================
+local function createRandomButton()
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, -6, 0, buttonHeight + 4)
+    btn.BackgroundColor3 = Color3.fromRGB(130, 60, 200)
+    btn.Text = "🎲 دنس رندوم"
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 14
+    btn.BorderSizePixel = 0
+    btn.LayoutOrder = 2
+    btn.Parent = scroll
+
+    local crn = Instance.new("UICorner")
+    crn.CornerRadius = UDim.new(0, 6)
+    crn.Parent = btn
+
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(180, 100, 255)
+    stroke.Thickness = 2
+    stroke.Parent = btn
+
+    btn.MouseButton1Click:Connect(function()
+        playClickSound()
+        if #allDances == 0 then return end
+        local randomDance = allDances[math.random(1, #allDances)]
+        if toggleData[randomDance.Name] then
+            local data = toggleData[randomDance.Name]
+            data.button.MouseButton1Click:Fire()
+        end
+    end)
+end
+
+-- ============================================
+-- MoonWalk
+-- ============================================
+local function createMJButton()
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, -6, 0, buttonHeight + 6)
+    btn.BackgroundColor3 = Color3.fromRGB(255, 170, 0)
+    btn.Text = "★ MoonWalk ★"
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Font = Enum.Font.GothamBlack
+    btn.TextSize = 14
+    btn.BorderSizePixel = 0
+    btn.LayoutOrder = 3
+    btn.Parent = scroll
+
+    local crn = Instance.new("UICorner")
+    crn.CornerRadius = UDim.new(0, 6)
+    crn.Parent = btn
+
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(255, 220, 100)
+    stroke.Thickness = 2
+    stroke.Parent = btn
+
+    local isPlayingMJ = false
+btn.MouseButton1Click:Connect(function()
+        if isPlayingMJ then return end
+        playClickSound()
+        isPlayingMJ = true
+        resetAllToggles()
+
+        local humanoid, char = getHumanoidSafe()
+        local hrp = char:WaitForChild("HumanoidRootPart")
+
+        btn.Text = "در حال اجرا..."
+        btn.BackgroundColor3 = Color3.fromRGB(120, 120, 120)
+
+        task.spawn(function()
+            local oldClockTime = Lighting.ClockTime
+            local oldFogColor = Lighting.FogColor
+            local oldFogEnd = Lighting.FogEnd
+            local oldAmbient = Lighting.Ambient
+            local oldOutdoorAmbient = Lighting.OutdoorAmbient
+
+            TweenService:Create(Lighting, TweenInfo.new(1.5), {
+                ClockTime = 0,
+                FogColor = Color3.fromRGB(10, 10, 10),
+                FogEnd = 150
+            }):Play()
+
+            local discoActive = true
+            task.spawn(function()
+                while discoActive do
+                    local randomColor = Color3.fromRGB(math.random(50, 255), math.random(50, 255), math.random(50, 255))
+                    TweenService:Create(Lighting, TweenInfo.new(0.35, Enum.EasingStyle.Sine), {
+                        Ambient = randomColor,
+                        OutdoorAmbient = randomColor
+                    }):Play()
+                    task.wait(0.35)
+                end
+            end)
+
+            local particles = Instance.new("ParticleEmitter")
+            particles.Color = ColorSequence.new(Color3.fromRGB(170, 0, 255))
+            particles.LightEmission = 1
+            particles.Size = NumberSequence.new({NumberSequenceKeypoint.new(0, 0.5), NumberSequenceKeypoint.new(1, 0)})
+            particles.Rate = 120
+            particles.Speed = NumberRange.new(5, 10)
+            particles.Lifetime = NumberRange.new(1, 1.5)
+            particles.SpreadAngle = Vector2.new(360, 360)
+            particles.Parent = hrp
+
+            local shakeName = "MJSmoothShake" .. tostring(math.random(100,999))
+            RunService:BindToRenderStep(shakeName, Enum.RenderPriority.Camera.Value + 1, function()
+                if humanoid then
+                    local t = tick() * 2
+                    local intensity = 0.4
+                    humanoid.CameraOffset = Vector3.new(
+                        math.noise(t, 1, 1) * intensity,
+                        math.noise(1, t, 1) * intensity,
+                        math.noise(1, 1, t) * intensity
+                    )
+                end
+            end)
+
+            local sound = Instance.new("Sound")
+            sound.SoundId = "rbxassetid://30231584"
+            sound.Volume = 5
+            sound.Parent = hrp
+            sound:Play()
+
+            local animator = humanoid:FindFirstChildOfClass("Animator") or humanoid
+
+            local anim1 = Instance.new("Animation")
+            anim1.AnimationId = "rbxassetid://182393478"
+            local track1 = animator:LoadAnimation(anim1)
+            track1.Priority = Enum.AnimationPriority.Action4
+            track1:Play()
+            task.wait(0.2)
+            track1:Stop()
+
+            local anim2 = Instance.new("Animation")
+            anim2.AnimationId = "rbxassetid://186934910"
+            local track2 = animator:LoadAnimation(anim2)
+            track2.Priority = Enum.AnimationPriority.Action4
+            track2.Looped = false
+            track2:Play()
+            track2:AdjustSpeed(0.5)
+            track2.Stopped:Wait()
+
+            local anim3 = Instance.new("Animation")
+            anim3.AnimationId = "rbxassetid://79094862"
+            local track3 = animator:LoadAnimation(anim3)
+            track3.Priority = Enum.AnimationPriority.Action4
+            track3.Looped = true
+            track3:Play()
+
+            local oldSpeed = humanoid.WalkSpeed
+            local oldAutoRotate = humanoid.AutoRotate
+
+            humanoid.WalkSpeed = 6
+            humanoid.AutoRotate = false
+
+            local backDir = -hrp.CFrame.LookVector
+            backDir = Vector3.new(backDir.X, 0, backDir.Z).Unit
+local renderName = "MJMoonwalk_"..tostring(math.random(1000,9999))
+            RunService:BindToRenderStep(renderName, Enum.RenderPriority.Character.Value + 1, function()
+                humanoid:Move(backDir, false)
+            end)
+
+            task.wait(3)
+
+            RunService:UnbindFromRenderStep(renderName)
+            RunService:UnbindFromRenderStep(shakeName)
+            humanoid.CameraOffset = Vector3.new(0, 0, 0)
+
+            humanoid:Move(Vector3.new(0, 0, 0), false)
+            humanoid.WalkSpeed = oldSpeed
+            humanoid.AutoRotate = oldAutoRotate
+
+            track3:Stop()
+            sound:Destroy()
+
+            particles.Enabled = false
+            game:GetService("Debris"):AddItem(particles, 2)
+
+            discoActive = false
+            TweenService:Create(Lighting, TweenInfo.new(2), {
+                ClockTime = oldClockTime,
+                FogColor = oldFogColor,
+                FogEnd = oldFogEnd,
+                Ambient = oldAmbient,
+                OutdoorAmbient = oldOutdoorAmbient
+            }):Play()
+
+            btn.Text = "★ MoonWalk ★"
+            btn.BackgroundColor3 = Color3.fromRGB(255, 170, 0)
+            isPlayingMJ = false
+        end)
+    end)
+end
+
+-- ============================================
+-- لیست کامل انیمیشن‌ها (اسکی از پنل قبلی)
+-- ============================================
+local buttonConfigs = {
+    {Name="رقص", AnimId="rbxassetid://75202452138001", Speed=1.6},
+    {Name="هکر", AnimId="rbxassetid://33796059", Speed=5},
+    {Name="چرخش", AnimId="rbxassetid://188632011", Speed=2},
+    {Name="هکر ۲", AnimId="rbxassetid://215384594", Speed=4},
+    {Name="MoonDance", AnimId="rbxassetid://27789359", Speed=1.1},
+    {Name="Charleston", AnimId="rbxassetid://429703734", Speed=1.1},
+    {Name="شناور", AnimId="rbxassetid://313762630", Speed=1},
+    {Name="بدون نام", AnimId="rbxassetid://148840371", Speed=3},
+    {Name="راه رفتن", AnimId="rbxassetid://180426354", Speed=1},
+    {Name="Slap", AnimId="rbxassetid://243827693", Speed=3},
+    {Name="خنده", AnimId="rbxassetid://129423131", Speed=1.25},
+    {Name="احترام نظامی", AnimId="rbxassetid://79094862", Speed=1},
+    {Name="Dia Delicia", AnimId="rbxassetid://115314801778772", Speed=1},
+    {Name="Aura Crouch", AnimId={"rbxassetid://287325678", "rbxassetid://70439247"}, Speed=1},
+    {Name="دنس ۱", AnimId="rbxassetid://507771019", Speed=1},
+    {Name="دنس ۲", AnimId="rbxassetid://507771955", Speed=1},
+    {Name="دنس ۳", AnimId="rbxassetid://507772104", Speed=1},
+}
+
+for _, config in ipairs(buttonConfigs) do
+    table.insert(allDances, config)
+end
+
+-- ============================================
+-- ساخت به ترتیب
+-- ============================================
+createStopButton()        -- LayoutOrder = 1
+createRandomButton()      -- LayoutOrder = 2
+createMJButton()          -- LayoutOrder = 3
+
+for _, config in ipairs(buttonConfigs) do
+    createToggleButton(config.Name, config.AnimId, config.Speed)
+end
+
+-- ============================================
+-- Collapse / Expand
+-- ============================================
+local collapsed = false
+toggleBtn.MouseButton1Click:Connect(function()
+    playClickSound()
+    if collapsed then
+        scroll.Visible = true
+        frame.Size = UDim2.new(0, 200, 0, 400)
+        toggleBtn.Text = "▲"
+        collapsed = false
+    else
+        scroll.Visible = false
+        frame.Size = UDim2.new(0, 200, 0, 40)
+        toggleBtn.Text = "▼"
+        collapsed = true
+    end
+end)
+
+print("✅ پک دنس ارتا (نسخه کامل) لود شد!")
