@@ -1,0 +1,334 @@
+-- ============================================================
+-- ===== Mr. Crab Restaurant Builder (پنل کامل) =====
+-- ============================================================
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local LocalPlayer = Players.LocalPlayer
+
+print("===== 🦀 Mr. Crab Panel =====")
+
+local function FindSyncAPI()
+    local tool
+    for _, v in pairs(LocalPlayer:GetDescendants()) do
+        if v.Name == "SyncAPI" then tool = v.Parent end
+    end
+    if not tool and LocalPlayer.Character then
+        for _, v in pairs(LocalPlayer.Character:GetDescendants()) do
+            if v.Name == "SyncAPI" then tool = v.Parent end
+        end
+    end
+    if not tool then
+        for _, v in pairs(ReplicatedStorage:GetDescendants()) do
+            if v.Name == "SyncAPI" then tool = v.Parent end
+        end
+    end
+    if not tool then
+        for _, v in pairs(workspace:GetDescendants()) do
+            if v.Name == "SyncAPI" then tool = v.Parent end
+        end
+    end
+    return tool
+end
+
+local F3XTool = FindSyncAPI()
+
+local function _(args)
+    if not F3XTool then
+        F3XTool = FindSyncAPI()
+        if not F3XTool then return end
+    end
+    local api = F3XTool:FindFirstChild("SyncAPI")
+    local remote = api and api:FindFirstChild("ServerEndpoint")
+    if remote then remote:InvokeServer(unpack(args)) end
+end
+
+local function CreatePart(cf)
+    _({ [1] = "CreatePart", [2] = "Normal", [3] = cf, [4] = workspace })
+end
+local function SetName(part, name)
+    _({ [1] = "SetName", [2] = { [1] = part }, [3] = name })
+end
+local function SetColor(part, color)
+    _({ [1] = "SyncColor", [2] = { [1] = { ["Part"] = part, ["Color"] = color } } })
+end
+local function SetMaterial(part, material)
+    _({ [1] = "SyncMaterial", [2] = { [1] = { ["Part"] = part, ["Material"] = material } } })
+end
+local function SetSize(part, size)
+    _({ [1] = "SyncSize", [2] = { [1] = { ["Part"] = part, ["Size"] = size } } })
+end
+local function SetLocked(part, locked)
+    _({ [1] = "SetLocked", [2] = { [1] = part }, [3] = locked })
+end
+local function AddDecal(part, textureId)
+    _({ [1] = "CreateTextures", [2] = { [1] = { ["Part"] = part, ["Face"] = Enum.NormalId.Front, ["TextureType"] = "Decal" } } })
+    task.wait(0.05)
+    _({ [1] = "SyncTexture", [2] = { [1] = { ["Part"] = part, ["Face"] = Enum.NormalId.Front, ["TextureType"] = "Decal", ["Texture"] = "rbxassetid://" .. textureId } } })
+end
+
+local function F3XPart(name, size, pos, color, material)
+    local cf = CFrame.new(pos)
+    local before = {}
+    for _, obj in pairs(workspace:GetChildren()) do
+        if obj:IsA("BasePart") then before[obj] = true end
+    end
+    CreatePart(cf)
+    task.wait(0.01)
+    local found, minDist = nil, 3
+    for _, obj in pairs(workspace:GetChildren()) do
+        if obj:IsA("BasePart") and not before[obj] then
+            local d = (obj.Position - pos).Magnitude
+            if d < minDist then minDist = d; found = obj end
+        end
+    end
+    if not found then return nil end
+    SetName(found, name)
+    SetSize(found, size)
+    SetColor(found, color)
+    SetMaterial(found, material)
+    SetLocked(found, true)
+    return found
+end
+
+-- ============================================================
+-- ===== ساخت رستوران =====
+-- ============================================================
+local function BuildRestaurant()
+    if not F3XTool then warn("❌ F3X نیست") return end
+    
+    local char = LocalPlayer.Character
+    if not char then return end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    
+    local look = hrp.CFrame.LookVector
+    local base = hrp.Position + Vector3.new(look.X, 0, look.Z).Unit * 30
+    base = Vector3.new(base.X, hrp.Position.Y, base.Z)
+    
+    print("🏗️ ساخت...")
+    local t0 = tick()
+    
+    -- کف
+    F3XPart("Floor", Vector3.new(60,1,50), base, Color3.fromRGB(210,170,120), Enum.Material.WoodPlanks)
+    F3XPart("FloorEntrance", Vector3.new(20,0.5,10), base+Vector3.new(0,0.6,25), Color3.fromRGB(120,120,120), Enum.Material.Cobblestone)
+    
+    -- پیشخوان
+    F3XPart("Counter", Vector3.new(30,4,3), base+Vector3.new(0,2,-18), Color3.fromRGB(80,50,30), Enum.Material.Wood)
+    F3XPart("CounterTop", Vector3.new(31,0.5,4), base+Vector3.new(0,4.5,-18), Color3.fromRGB(230,230,230), Enum.Material.Marble)
+    
+    -- صندوق
+    F3XPart("CashRegister1", Vector3.new(2.5,2,2), base+Vector3.new(-10,6,-18), Color3.fromRGB(40,40,40), Enum.Material.Metal)
+    F3XPart("CashRegister2", Vector3.new(2.5,2,2), base+Vector3.new(10,6,-18), Color3.fromRGB(40,40,40), Enum.Material.Metal)
+    
+    -- میزها
+    local tables = {
+        {-20,-5}, {0,-5}, {20,-5},
+        {-20,5}, {0,5}, {20,5},
+        {-20,15}, {0,15}, {20,15}
+    }
+    for i, t in ipairs(tables) do
+        local tPos = base + Vector3.new(t[1], 0, t[2])
+        F3XPart("TableBase"..i, Vector3.new(2,3,2), tPos+Vector3.new(0,1.5,0), Color3.fromRGB(80,50,20), Enum.Material.Wood)
+        F3XPart("TableTop"..i, Vector3.new(7,0.5,7), tPos+Vector3.new(0,3,0), Color3.fromRGB(150,100,50), Enum.Material.Wood)
+        for j = 1, 4 do
+            local offset
+            if j == 1 then offset = Vector3.new(4.5,0,0)
+            elseif j == 2 then offset = Vector3.new(-4.5,0,0)
+            elseif j == 3 then offset = Vector3.new(0,0,4.5)
+            else offset = Vector3.new(0,0,-4.5) end
+            F3XPart("Seat"..i.."_"..j, Vector3.new(2,0.5,2), tPos+offset+Vector3.new(0,1.5,0), Color3.fromRGB(200,60,60), Enum.Material.SmoothPlastic)
+            F3XPart("Back"..i.."_"..j, Vector3.new(2,2.5,0.3), tPos+offset+offset.Unit*0.9+Vector3.new(0,3,0), Color3.fromRGB(200,60,60), Enum.Material.SmoothPlastic)
+        end
+    end
+    
+    -- خرچنگ‌ها
+    for i, x in ipairs({-12, -6, 0, 6, 12}) do
+        F3XPart("CrabBody"..i, Vector3.new(3.5,2.2,2.8), base+Vector3.new(x,7,-18), Color3.fromRGB(230,30,30), Enum.Material.SmoothPlastic)
+        F3XPart("CrabHead"..i, Vector3.new(2.2,1.8,1.8), base+Vector3.new(x,7.6,-15.5), Color3.fromRGB(240,50,50), Enum.Material.SmoothPlastic)
+        F3XPart("Eye1_"..i, Vector3.new(0.5,0.5,0.5), base+Vector3.new(x-0.5,7.9,-14.9), Color3.fromRGB(255,255,255), Enum.Material.Neon)
+        F3XPart("Eye2_"..i, Vector3.new(0.5,0.5,0.5), base+Vector3.new(x+0.5,7.9,-14.9), Color3.fromRGB(255,255,255), Enum.Material.Neon)
+        F3XPart("ClawL"..i, Vector3.new(2,0.6,1), base+Vector3.new(x-2.2,6.5,-19), Color3.fromRGB(230,30,30), Enum.Material.SmoothPlastic)
+        F3XPart("ClawR"..i, Vector3.new(2,0.6,1), base+Vector3.new(x+2.2,6.5,-19), Color3.fromRGB(230,30,30), Enum.Material.SmoothPlastic)
+    end
+    
+    -- عکس
+    local pic = F3XPart("WallPicture", Vector3.new(26,16,0.4), base+Vector3.new(0,8.2,-23.6), Color3.fromRGB(255,255,255), Enum.Material.SmoothPlastic)
+    if pic then AddDecal(pic, "94436187842563") end
+    
+    -- تابلو
+    F3XPart("Sign", Vector3.new(30,6,0.5), base+Vector3.new(0,24,-25), Color3.fromRGB(255,200,50), Enum.Material.Neon)
+    
+    -- چراغ‌ها
+    for i, x in ipairs({-20, -12, -4, 4, 12, 20}) do
+        F3XPart("Lamp"..i, Vector3.new(3,1,3), base+Vector3.new(x,20.5,0), Color3.fromRGB(255,255,180), Enum.Material.Neon)
+    end
+    
+    -- ستون‌ها
+    for i, pos in ipairs({{-28,20}, {28,20}, {-28,-20}, {28,-20}}) do
+        F3XPart("Pillar"..i, Vector3.new(2.5,22,2.5), base+Vector3.new(pos[1],11,pos[2]), Color3.fromRGB(240,240,240), Enum.Material.Marble)
+    end
+    
+    -- فرش
+    F3XPart("Carpet", Vector3.new(20,0.2,12), base+Vector3.new(0,1,15), Color3.fromRGB(150,20,20), Enum.Material.Fabric)
+    
+    -- آکواریوم
+    F3XPart("Aquarium", Vector3.new(15,8,1), base+Vector3.new(0,14,-24), Color3.fromRGB(50,150,255), Enum.Material.Glass)
+    
+    print("🦀 تمام شد! زمان: " .. string.format("%.1f", tick() - t0) .. " ثانیه")
+end
+-- ============================================================
+-- ===== GUI =====
+-- ============================================================
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "MrCrabPanel"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+-- ===== دکمه شناور باز کردن پنل =====
+local OpenBtn = Instance.new("TextButton", ScreenGui)
+OpenBtn.Size = UDim2.new(0, 60, 0, 60)
+OpenBtn.Position = UDim2.new(0, 20, 0.4, 0)
+OpenBtn.Text = "🦀"
+OpenBtn.TextColor3 = Color3.new(1, 1, 1)
+OpenBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+OpenBtn.Font = Enum.Font.GothamBold
+OpenBtn.TextSize = 28
+OpenBtn.BorderSizePixel = 0
+Instance.new("UICorner", OpenBtn).CornerRadius = UDim.new(0, 30)
+OpenBtn.Visible = true
+
+-- ===== پنل اصلی =====
+local Main = Instance.new("Frame", ScreenGui)
+Main.Size = UDim2.new(0, 280, 0, 200)
+Main.Position = UDim2.new(0, 10, 0.5, -100)
+Main.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+Main.BorderSizePixel = 0
+Main.Visible = false
+Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 12)
+
+local Title = Instance.new("TextLabel", Main)
+Title.Size = UDim2.new(1, 0, 0, 45)
+Title.Text = "🦀 Mr. Crab Restaurant"
+Title.TextColor3 = Color3.fromRGB(255, 100, 100)
+Title.BackgroundColor3 = Color3.fromRGB(35, 20, 25)
+Title.BackgroundTransparency = 0.3
+Title.Font = Enum.Font.GothamBlack
+Title.TextSize = 15
+Title.BorderSizePixel = 0
+Instance.new("UICorner", Title).CornerRadius = UDim.new(0, 12)
+
+local CloseBtn = Instance.new("TextButton", Title)
+CloseBtn.Size = UDim2.new(0, 30, 0, 30)
+CloseBtn.Position = UDim2.new(1, -35, 0, 7)
+CloseBtn.Text = "X"
+CloseBtn.TextColor3 = Color3.new(1, 1, 1)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.TextSize = 14
+CloseBtn.BorderSizePixel = 0
+Instance.new("UICorner", CloseBtn).CornerRadius = UDim.new(0, 6)
+
+local StatusLabel = Instance.new("TextLabel", Main)
+StatusLabel.Size = UDim2.new(1, -20, 0, 25)
+StatusLabel.Position = UDim2.new(0, 10, 0, 50)
+StatusLabel.Text = F3XTool and "✅ F3X آماده - همه می‌بینن" or "❌ F3X نیست!"
+StatusLabel.TextColor3 = F3XTool and Color3.fromRGB(100, 255, 100) or Color3.fromRGB(255, 100, 100)
+StatusLabel.BackgroundTransparency = 1
+StatusLabel.Font = Enum.Font.Gotham
+StatusLabel.TextSize = 11
+
+local BuildBtn = Instance.new("TextButton", Main)
+BuildBtn.Size = UDim2.new(0.85, 0, 0, 60)
+BuildBtn.Position = UDim2.new(0.075, 0, 0.42, 0)
+BuildBtn.Text = "🏗️ ساخت رستوران"
+BuildBtn.TextColor3 = Color3.new(1, 1, 1)
+BuildBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+BuildBtn.Font = Enum.Font.GothamBold
+BuildBtn.TextSize = 15
+BuildBtn.BorderSizePixel = 0
+Instance.new("UICorner", BuildBtn).CornerRadius = UDim.new(0, 8)
+
+local ProgressLabel = Instance.new("TextLabel", Main)
+ProgressLabel.Size = UDim2.new(1, -20, 0, 20)
+ProgressLabel.Position = UDim2.new(0, 10, 0.85, 0)
+ProgressLabel.Text = ""
+ProgressLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
+ProgressLabel.BackgroundTransparency = 1
+ProgressLabel.Font = Enum.Font.Gotham
+ProgressLabel.TextSize = 10
+
+-- درگ پنل
+local dragging = false
+local dragStart, startPos = nil, nil
+Title.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = Main.Position
+    end
+end)
+UserInputService.InputChanged:Connect(function(input)
+    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - dragStart
+        Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = false
+    end
+end)
+-- باز کردن پنل
+OpenBtn.MouseButton1Click:Connect(function()
+    Main.Visible = true
+    OpenBtn.Visible = false
+    if not F3XTool then
+        F3XTool = FindSyncAPI()
+        StatusLabel.Text = F3XTool and "✅ F3X آماده - همه می‌بینن" or "❌ F3X نیست!"
+        StatusLabel.TextColor3 = F3XTool and Color3.fromRGB(100, 255, 100) or Color3.fromRGB(255, 100, 100)
+    end
+end)
+
+-- بستن پنل
+CloseBtn.MouseButton1Click:Connect(function()
+    Main.Visible = false
+    OpenBtn.Visible = true
+end)
+
+-- ساخت
+BuildBtn.MouseButton1Click:Connect(function()
+    if not F3XTool then
+        F3XTool = FindSyncAPI()
+        if not F3XTool then
+            StatusLabel.Text = "❌ F3X نیست! اول Tool F3X رو بگیر"
+            StatusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+            return
+        end
+    end
+    
+    BuildBtn.Text = "⏳ ساخت..."
+    BuildBtn.BackgroundColor3 = Color3.fromRGB(255, 200, 50)
+    
+    task.spawn(function()
+        BuildRestaurant()
+        BuildBtn.Text = "✅ تمام!"
+        BuildBtn.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
+        ProgressLabel.Text = "🦀 همه می‌بینن!"
+        task.wait(2)
+        BuildBtn.Text = "🏗️ ساخت رستوران"
+        BuildBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+        ProgressLabel.Text = ""
+    end)
+end)
+
+-- کلید =
+UserInputService.InputBegan:Connect(function(input, processed)
+    if processed then return end
+    if input.KeyCode == Enum.KeyCode.Equals then
+        Main.Visible = not Main.Visible
+        OpenBtn.Visible = not Main.Visible
+    end
+end)
+
+print("✅ پنل آماده! دکمه 🦀 رو بزن 🦀")
