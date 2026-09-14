@@ -1,0 +1,360 @@
+-- ============================================================
+-- ===== NPC Body Control - F3X Edition =====
+-- ============================================================
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local LocalPlayer = Players.LocalPlayer
+
+print("===== 🎮 NPC Body Control (F3X) =====")
+
+-- ============================================================
+-- ===== چک F3X =====
+-- ============================================================
+local function FindSyncAPI()
+    local tool
+    for _, v in pairs(LocalPlayer:GetDescendants()) do
+        if v.Name == "SyncAPI" then tool = v.Parent end
+    end
+    if not tool and LocalPlayer.Character then
+        for _, v in pairs(LocalPlayer.Character:GetDescendants()) do
+            if v.Name == "SyncAPI" then tool = v.Parent end
+        end
+    end
+    if not tool then
+        for _, v in pairs(ReplicatedStorage:GetDescendants()) do
+            if v.Name == "SyncAPI" then tool = v.Parent end
+        end
+    end
+    if not tool then
+        for _, v in pairs(workspace:GetDescendants()) do
+            if v.Name == "SyncAPI" then tool = v.Parent end
+        end
+    end
+    return tool
+end
+
+local F3XTool = FindSyncAPI()
+local HasF3X = F3XTool ~= nil
+
+if HasF3X then
+    print("✅ F3X هست → همه می‌بینن!")
+else
+    print("⚠️ F3X نیست → فقط خودت می‌بینی")
+end
+
+-- ============================================================
+-- ===== F3X Sync =====
+-- ============================================================
+local function _(args)
+    if not F3XTool then
+        F3XTool = FindSyncAPI()
+        if not F3XTool then return end
+    end
+    local api = F3XTool:FindFirstChild("SyncAPI")
+    local remote = api and api:FindFirstChild("ServerEndpoint")
+    if remote then
+        pcall(function() remote:InvokeServer(unpack(args)) end)
+    end
+end
+
+-- ============================================================
+-- ===== پیدا کردن NPC =====
+-- ============================================================
+local function FindNPCs()
+    local npcs = {}
+    for _, obj in pairs(workspace:GetChildren()) do
+        if obj:IsA("Model") then
+            local humanoid = obj:FindFirstChildOfClass("Humanoid")
+            local hrp = obj:FindFirstChild("HumanoidRootPart") or obj:FindFirstChild("Torso") or obj:FindFirstChild("UpperTorso")
+            if humanoid and hrp and not Players:GetPlayerFromCharacter(obj) then
+                table.insert(npcs, {Model = obj, Humanoid = humanoid, HRP = hrp, Name = obj.Name})
+            end
+        end
+    end
+    return npcs
+end
+
+local NPCs = FindNPCs()
+print("✅ " .. #NPCs .. " NPC پیدا شد")
+
+if #NPCs == 0 then
+    warn("❌ NPC نیست")
+    return
+end
+
+-- ============================================================
+-- ===== متغیرها =====
+-- ============================================================
+local SelectedNPC = NPCs[1]
+local IsInNPC = false
+local OriginalCFrame = nil
+local OriginalWalkSpeed = 16
+local OriginalJumpPower = 50
+local Camera = workspace.CurrentCamera
+local LastMoveTime = 0
+
+-- ============================================================
+-- ===== ورود به NPC =====
+-- ============================================================
+local function EnterNPC()
+    if not SelectedNPC or not SelectedNPC.Model.Parent then return end
+    
+    local char = LocalPlayer.Character
+    if not char then return end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if not hrp or not hum then return end
+    
+    OriginalCFrame = hrp.CFrame
+    OriginalWalkSpeed = hum.WalkSpeed
+    OriginalJumpPower = hum.JumpPower
+    
+    -- بدن خودت رو AFK کن
+hum.WalkSpeed = 0
+    hum.JumpPower = 0
+    
+    -- دوربین بره روی NPC
+    Camera.CameraSubject = SelectedNPC.Humanoid
+    
+    IsInNPC = true
+    print("✅ داخل NPC: " .. SelectedNPC.Name)
+    print("👤 بدن خودت AFK موند")
+    
+    if HasF3X then
+        print("🌐 همه می‌بینن!")
+    else
+        print("⚠️ فقط خودت می‌بینی")
+    end
+end
+
+-- ============================================================
+-- ===== خروج از NPC =====
+-- ============================================================
+local function ExitNPC()
+    if not IsInNPC then return end
+    
+    local char = LocalPlayer.Character
+    if char then
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if hum then
+            hum.WalkSpeed = OriginalWalkSpeed
+            hum.JumpPower = OriginalJumpPower
+            Camera.CameraSubject = hum
+        end
+    end
+    
+    if SelectedNPC and SelectedNPC.Humanoid then
+        SelectedNPC.Humanoid:Move(Vector3.new(0, 0, 0), false)
+    end
+    
+    IsInNPC = false
+    print("✅ از NPC خارج شدی")
+end
+
+-- ============================================================
+-- ===== حرکت NPC (با F3X یا معمولی) =====
+-- ============================================================
+local function MoveNPC(direction)
+    if not SelectedNPC or not SelectedNPC.Model.Parent then return end
+    
+    local npcHum = SelectedNPC.Humanoid
+    local npcHRP = SelectedNPC.HRP
+    if not npcHum or not npcHRP then return end
+    
+    if direction.Magnitude < 0.1 then
+        npcHum:Move(Vector3.new(0, 0, 0), false)
+        return
+    end
+    
+    if HasF3X then
+        -- با F3X حرکت بده → همه می‌بینن
+        local speed = 16
+        local newPos = npcHRP.Position + direction.Unit * speed * 0.1
+        
+        -- با F3X قطعه رو جابه‌جا کن (Sync میشه)
+        _({
+            [1] = "SyncMove",
+            [2] = {
+                [1] = {
+                    ["Part"] = npcHRP,
+                    ["Position"] = newPos,
+                    ["Rotation"] = npcHRP.CFrame
+                }
+            }
+        })
+    end
+    
+    -- همیشه Humanoid:Move هم بزن (برای انیمیشن راه رفتن)
+    npcHum:Move(direction.Unit, false)
+end
+
+-- ============================================================
+-- ===== حلقه اصلی =====
+-- ============================================================
+RunService.Heartbeat:Connect(function(dt)
+    if not IsInNPC then return end
+    if not SelectedNPC or not SelectedNPC.Model.Parent then return end
+    
+    -- دوربین رو روی NPC نگه دار
+    if Camera.CameraSubject ~= SelectedNPC.Humanoid then
+        Camera.CameraSubject = SelectedNPC.Humanoid
+    end
+    
+    -- حرکت با جوی‌استیک بازیکن
+    local char = LocalPlayer.Character
+    if char then
+        local playerHum = char:FindFirstChildOfClass("Humanoid")
+        if playerHum then
+            local moveDir = playerHum.MoveDirection
+            
+            if moveDir.Magnitude > 0.1 then
+                if tick() - LastMoveTime > 0.05 then
+                    MoveNPC(moveDir)
+                    LastMoveTime = tick()
+                end
+            else
+                SelectedNPC.Humanoid:Move(Vector3.new(0, 0, 0), false)
+            end
+        end
+    end
+end)
+
+-- ============================================================
+-- ===== GUI =====
+-- ============================================================
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "NPCControl"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+-- دکمه شناور
+local OpenBtn = Instance.new("TextButton", ScreenGui)
+OpenBtn.Size = UDim2.new(0, 55, 0, 55)
+OpenBtn.Position = UDim2.new(0, 15, 0.3, 0)
+OpenBtn.Text = "🎮"
+OpenBtn.TextColor3 = Color3.new(1, 1, 1)
+OpenBtn.BackgroundColor3 = Color3.fromRGB(50, 100, 200)
+OpenBtn.Font = Enum.Font.GothamBold
+OpenBtn.TextSize = 24
+OpenBtn.BorderSizePixel = 0
+Instance.new("UICorner", OpenBtn).CornerRadius = UDim.new(0, 28)
+-- پنل اصلی
+local Main = Instance.new("Frame", ScreenGui)
+Main.Size = UDim2.new(0, 260, 0, 250)
+Main.Position = UDim2.new(0, 15, 0.5, -125)
+Main.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+Main.BorderSizePixel = 0
+Main.Visible = false
+Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 12)
+
+local Title = Instance.new("TextLabel", Main)
+Title.Size = UDim2.new(1, 0, 0, 38)
+Title.Text = "🎮 NPC Body Control"
+Title.TextColor3 = Color3.fromRGB(100, 200, 255)
+Title.BackgroundColor3 = Color3.fromRGB(25, 35, 50)
+Title.BackgroundTransparency = 0.3
+Title.Font = Enum.Font.GothamBlack
+Title.TextSize = 13
+Title.BorderSizePixel = 0
+Instance.new("UICorner", Title).CornerRadius = UDim.new(0, 12)
+
+local CloseBtn = Instance.new("TextButton", Title)
+CloseBtn.Size = UDim2.new(0, 28, 0, 28)
+CloseBtn.Position = UDim2.new(1, -32, 0, 5)
+CloseBtn.Text = "X"
+CloseBtn.TextColor3 = Color3.new(1, 1, 1)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.TextSize = 13
+CloseBtn.BorderSizePixel = 0
+Instance.new("UICorner", CloseBtn).CornerRadius = UDim.new(0, 6)
+
+-- وضعیت F3X
+local F3XStatus = Instance.new("TextLabel", Main)
+F3XStatus.Size = UDim2.new(1, -20, 0, 22)
+F3XStatus.Position = UDim2.new(0, 10, 0, 42)
+F3XStatus.Text = HasF3X and "✅ F3X هست - همه می‌بینن" or "⚠️ F3X نیست - فقط خودت"
+F3XStatus.TextColor3 = HasF3X and Color3.fromRGB(100, 255, 100) or Color3.fromRGB(255, 200, 100)
+F3XStatus.BackgroundTransparency = 1
+F3XStatus.Font = Enum.Font.GothamBold
+F3XStatus.TextSize = 10
+
+local SelectedLabel = Instance.new("TextLabel", Main)
+SelectedLabel.Size = UDim2.new(1, -20, 0, 25)
+SelectedLabel.Position = UDim2.new(0, 10, 0, 68)
+SelectedLabel.Text = "🎯 NPC: " .. SelectedNPC.Name
+SelectedLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
+SelectedLabel.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
+SelectedLabel.Font = Enum.Font.GothamBold
+SelectedLabel.TextSize = 11
+SelectedLabel.BorderSizePixel = 0
+Instance.new("UICorner", SelectedLabel).CornerRadius = UDim.new(0, 6)
+
+-- دکمه ورود
+local EnterBtn = Instance.new("TextButton", Main)
+EnterBtn.Size = UDim2.new(0.9, 0, 0, 50)
+EnterBtn.Position = UDim2.new(0.05, 0, 0, 100)
+EnterBtn.Text = "🚪 ورود به بدن NPC"
+EnterBtn.TextColor3 = Color3.new(1, 1, 1)
+EnterBtn.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
+EnterBtn.Font = Enum.Font.GothamBold
+EnterBtn.TextSize = 13
+EnterBtn.BorderSizePixel = 0
+Instance.new("UICorner", EnterBtn).CornerRadius = UDim.new(0, 8)
+
+-- دکمه خروج
+local ExitBtn = Instance.new("TextButton", Main)
+ExitBtn.Size = UDim2.new(0.9, 0, 0, 50)
+ExitBtn.Position = UDim2.new(0.05, 0, 0, 158)
+ExitBtn.Text = "🚪 خروج از بدن"
+ExitBtn.TextColor3 = Color3.new(1, 1, 1)
+ExitBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+ExitBtn.Font = Enum.Font.GothamBold
+ExitBtn.TextSize = 13
+ExitBtn.BorderSizePixel = 0
+Instance.new("UICorner", ExitBtn).CornerRadius = UDim.new(0, 8)
+ExitBtn.Visible = false
+
+local InfoLabel = Instance.new("TextLabel", Main)
+InfoLabel.Size = UDim2.new(1, -20, 0, 25)
+InfoLabel.Position = UDim2.new(0, 10, 0, 218)
+InfoLabel.Text = "📱 با جوی‌استیک راه برو"
+InfoLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+InfoLabel.BackgroundTransparency = 1
+InfoLabel.Font = Enum.Font.Gotham
+InfoLabel.TextSize = 10
+
+-- ============================================================
+-- ===== رویدادها =====
+-- ============================================================
+OpenBtn.MouseButton1Click:Connect(function()
+    Main.Visible = true
+    OpenBtn.Visible = false
+end)
+
+CloseBtn.MouseButton1Click:Connect(function()
+    Main.Visible = false
+    OpenBtn.Visible = true
+end)
+
+EnterBtn.MouseButton1Click:Connect(function()
+    EnterNPC()
+    EnterBtn.Visible = false
+    ExitBtn.Visible = true
+end)
+
+ExitBtn.MouseButton1Click:Connect(function()
+    ExitNPC()
+    EnterBtn.Visible = true
+    ExitBtn.Visible = false
+end)
+
+UserInputService.InputBegan:Connect(function(input, processed)
+    if processed then return end
+    if input.KeyCode == Enum.KeyCode.Equals then
+        Main.Visible = not Main.Visible
+        OpenBtn.Visible = not Main.Visible
+    end
+end)
