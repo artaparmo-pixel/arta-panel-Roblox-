@@ -1,33 +1,58 @@
--- ============================================================
--- ARTA MAP - F3X
--- ============================================================
+-- hey yo skid
+-- کامند های دستی
+-- CanCollide: False
+-- SpawnPoint: True
+-- Decal.Top,Right... = ID
+-- Light: True
+-- Fire: True
+-- Texture: ID
+-- Mesh: ID
+-- MeshType: FileMesh (یا Head, Sphere, Brick و غیره)
+-- MeshScale: 1.5, 2, 1.5 (با پرانتز یا بدون پرانتز)
+
+local LIGHT_ALL_PARTS = false
+local GLOBAL_LIGHT_RANGE = 20
+local GLOBAL_LIGHT_BRIGHTNESS = 0.011
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local Player = Players.LocalPlayer
 
--- پیدا کردن F3X
+-- پیدا کردن سریع ابزار F3X
 local tool
-for _, v in ipairs(Player:GetDescendants()) do 
-    if v.Name == "SyncAPI" then tool = v.Parent break end 
-end
-if not tool then 
-    for _, v in ipairs(ReplicatedStorage:GetDescendants()) do 
-        if v.Name == "SyncAPI" then tool = v.Parent break end 
-    end 
-end
-if not tool or not tool:FindFirstChild("SyncAPI") then 
-    warn("خطا: ابزار F3X پیدا نشد!") 
-    return 
-end
+for _, v in ipairs(Player:GetDescendants()) do if v.Name == "SyncAPI" then tool = v.Parent break end end
+if not tool then for _, v in ipairs(ReplicatedStorage:GetDescendants()) do if v.Name == "SyncAPI" then tool = v.Parent break end end end
+if not tool or not tool:FindFirstChild("SyncAPI") then warn("خطا: ابزار F3X پیدا نشد!") return end
 
 local remote = tool.SyncAPI.ServerEndpoint
-print("✅ F3X پیدا شد!")
 
--- ============================================================
--- دیتای خام (با عکس ARTA)
--- ============================================================
+local ActiveSyncs = 0
+
+local function FireMassiveSync(action, dataArray, extraArg)
+    if not dataArray or #dataArray == 0 then return end
+    ActiveSyncs = ActiveSyncs + 1
+    task.spawn(function()
+        pcall(function()
+            if extraArg ~= nil then 
+                remote:InvokeServer(action, dataArray, extraArg)
+            else 
+                remote:InvokeServer(action, dataArray) 
+            end
+        end)
+        ActiveSyncs = ActiveSyncs - 1
+    end)
+end
+
+local function safeNum(val, default) return tonumber(val) or default or 0 end
+
+local function SetFreeze(state)
+    local char = Player.Character
+    if char and char:FindFirstChild("HumanoidRootPart") then
+        char.HumanoidRootPart.Anchored = state
+    end
+end
+
 local RawData = [[
 Part 1:
  Position: (149.00, 53.00, 13.50)
@@ -122,6 +147,68 @@ Part 10:
  Material: Carpet
  Transparency: 0.00
 
+Part 11:
+ Position: (-18.50, 15.00, 63.70)
+ Rotation: (0.00, 180.00, 0.00)
+ Shape: Block
+ Size: (3.00, 1.00, 0.30)
+ Color: 0.105882, 0.164706, 0.207843
+ Material: Plastic
+ Transparency: 0.00
+
+Part 12:
+ Position: (-17.00, 14.00, 63.70)
+ Rotation: (0.00, 180.00, 90.00)
+ Shape: Block
+ Size: (4.00, 1.00, 0.30)
+ Color: 0.105882, 0.164706, 0.207843
+ Material: Plastic
+ Transparency: 0.00
+Part 13:
+ Position: (-15.50, 12.50, 63.70)
+ Rotation: (0.00, 180.00, 180.00)
+ Shape: Block
+ Size: (3.00, 1.00, 0.30)
+ Color: 0.105882, 0.164706, 0.207843
+ Material: Plastic
+ Transparency: 0.00
+
+Part 14:
+ Position: (-15.50, 15.00, 63.70)
+ Rotation: (0.00, 180.00, 0.00)
+ Shape: Block
+ Size: (3.00, 1.00, 0.30)
+ Color: 0.105882, 0.164706, 0.207843
+ Material: Plastic
+ Transparency: 0.00
+
+Part 15:
+ Position: (-17.00, 16.50, 63.70)
+ Rotation: (0.00, 180.00, 90.00)
+ Shape: Block
+ Size: (4.00, 1.00, 0.30)
+ Color: 0.105882, 0.164706, 0.207843
+ Material: Plastic
+ Transparency: 0.00
+
+Part 16:
+ Position: (-18.50, 18.00, 63.70)
+ Rotation: (0.00, 180.00, 0.00)
+ Shape: Block
+ Size: (3.00, 1.00, 0.30)
+ Color: 0.105882, 0.164706, 0.207843
+ Material: Plastic
+ Transparency: 0.00
+
+Part 17:
+ Position: (-14.50, 17.00, 63.70)
+ Rotation: (0.00, 180.00, 90.00)
+ Shape: Block
+ Size: (3.00, 1.00, 0.30)
+ Color: 0.105882, 0.164706, 0.207843
+ Material: Plastic
+ Transparency: 0.00
+
 Part 18:
  Position: (-17.00, 15.50, 63.90)
  Rotation: (90.00, -90.00, 0.00)
@@ -129,6 +216,114 @@ Part 18:
  Size: (0.40, 37.00, 10.00)
  Color: 0.905882, 0.905882, 0.92549
  Material: Ice
+ Transparency: 0.00
+
+Part 19:
+ Position: (0.50, 13.50, 63.70)
+ Rotation: (0.00, 180.00, 90.00)
+ Shape: Block
+ Size: (3.00, 1.00, 0.30)
+ Color: 0.105882, 0.164706, 0.207843
+ Material: Plastic
+ Transparency: 0.00
+
+Part 20:
+ Position: (3.00, 5.00, 64.00)
+ Rotation: (0.00, 180.00, 0.00)
+ Shape: Block
+ Size: (1.00, 10.00, 0.40)
+ Color: 0.584314, 0.537255, 0.533333
+ Material: Asphalt
+ Transparency: 0.00
+
+Part 21:
+ Position: (3.00, 15.50, 64.00)
+ Rotation: (0.00, 180.00, 0.00)
+ Shape: Block
+ Size: (10.00, 11.00, 0.40)
+ Color: 1, 0, 0
+ Material: Carpet
+ Transparency: 0.00
+
+Part 22:
+ Position: (1.50, 15.00, 63.70)
+ Rotation: (0.00, 180.00, 0.00)
+ Shape: Block
+ Size: (3.00, 1.00, 0.30)
+ Color: 0.105882, 0.164706, 0.207843
+ Material: Plastic
+ Transparency: 0.00
+
+Part 23:
+ Position: (3.00, 14.00, 63.70)
+ Rotation: (0.00, 180.00, 90.00)
+ Shape: Block
+ Size: (4.00, 1.00, 0.30)
+ Color: 0.105882, 0.164706, 0.207843
+ Material: Plastic
+ Transparency: 0.00
+
+Part 24:
+ Position: (4.50, 12.50, 63.70)
+ Rotation: (0.00, 180.00, 180.00)
+ Shape: Block
+ Size: (3.00, 1.00, 0.30)
+ Color: 0.105882, 0.164706, 0.207843
+ Material: Plastic
+ Transparency: 0.00
+
+Part 25:
+ Position: (4.50, 15.00, 63.70)
+ Rotation: (0.00, 180.00, 0.00)
+ Shape: Block
+ Size: (3.00, 1.00, 0.30)
+ Color: 0.105882, 0.164706, 0.207843
+ Material: Plastic
+ Transparency: 0.00
+
+Part 26:
+ Position: (3.00, 16.50, 63.70)
+ Rotation: (0.00, 180.00, 90.00)
+ Shape: Block
+ Size: (4.00, 1.00, 0.30)
+ Color: 0.105882, 0.164706, 0.207843
+ Material: Plastic
+ Transparency: 0.00
+
+Part 27:
+ Position: (1.50, 18.00, 63.70)
+ Rotation: (0.00, 180.00, 0.00)
+ Shape: Block
+ Size: (3.00, 1.00, 0.30)
+ Color: 0.105882, 0.164706, 0.207843
+ Material: Plastic
+ Transparency: 0.00
+
+Part 28:
+ Position: (5.50, 17.00, 63.70)
+ Rotation: (0.00, 180.00, 90.00)
+ Shape: Block
+ Size: (3.00, 1.00, 0.30)
+ Color: 0.105882, 0.164706, 0.207843
+ Material: Plastic
+ Transparency: 0.00
+
+Part 29:
+ Position: (3.00, 15.50, 63.90)
+ Rotation: (90.00, -90.00, 0.00)
+ Shape: Cylinder
+ Size: (0.40, 37.00, 10.00)
+ Color: 0.905882, 0.905882, 0.92549
+ Material: Ice
+ Transparency: 0.00
+
+Part 30:
+ Position: (20.50, 13.50, 63.70)
+ Rotation: (0.00, 180.00, 90.00)
+ Shape: Block
+ Size: (3.00, 1.00, 0.30)
+ Color: 0.105882, 0.164706, 0.207843
+ Material: Plastic
  Transparency: 0.00
 
 Part 162:
@@ -157,7 +352,6 @@ Part 164:
  Color: 1, 0, 0
  Material: Ice
  Transparency: 0.00
-
 Part 165:
  Position: (-71.00, 33.00, -1.00)
  Rotation: (0.00, 0.00, 0.00)
@@ -176,11 +370,11 @@ Part 166:
  Color: 0.152941, 0.27451, 0.176471
  Material: Grass
  Transparency: 0.00
-]]-- ============================================================
--- کد پردازش
--- ============================================================
-print("⏳ تجزیه دیتا...")
+]]
 
+-- ============================================================
+-- پردازش
+-- ============================================================
 local function parseVector(str)
     local x, y, z = str:match("%(([%d%.%-]+),%s*([%d%.%-]+),%s*([%d%.%-]+)%)")
     return Vector3.new(tonumber(x) or 0, tonumber(y) or 0, tonumber(z) or 0)
@@ -202,41 +396,30 @@ local function parseShape(str)
     return Enum.PartType.Block
 end
 
--- تجزیه دیتا
-local parts = {}
-local currentPart = nil
-
-for line in RawData:gmatch("[^\r\n]+") do
-    line = line:gsub("^%s+", ""):gsub("%s+$", "")
-    
-    if line:match("^Part%s+%d+:") then
-        if currentPart then
-            table.insert(parts, currentPart)
-        end
-        currentPart = {}
-    elseif currentPart then
-        local key, value = line:match("^([%w%.]+):%s*(.+)$")
-        if key and value then
-            currentPart[key] = value
+local function parseData(raw)
+    local parts = {}
+    local currentPart = nil
+    for line in raw:gmatch("[^\r\n]+") do
+        line = line:gsub("^%s+", ""):gsub("%s+$", "")
+        if line:match("^Part%s+%d+:") then
+            if currentPart then table.insert(parts, currentPart) end
+            currentPart = {}
+        elseif currentPart then
+            local key, value = line:match("^([%w%.]+):%s*(.+)$")
+            if key and value then currentPart[key] = value end
         end
     end
+    if currentPart then table.insert(parts, currentPart) end
+    return parts
 end
 
-if currentPart then
-    table.insert(parts, currentPart)
-end
+print("⏳ تجزیه...")
+local parts = parseData(RawData)
+print("📦 " .. #parts .. " پارت")
 
-print("📦 " .. #parts .. " پارت پیدا شد")
-
--- فریز کردن پلیر
-local char = Player.Character
-if char and char:FindFirstChild("HumanoidRootPart") then
-    char.HumanoidRootPart.Anchored = true
-end
-
+SetFreeze(true)
 print("⏳ ساخت مپ...")
 
--- ساخت پارت‌ها
 for i, partData in ipairs(parts) do
     local pos = parseVector(partData.Position or "(0,0,0)")
     local rot = parseVector(partData.Rotation or "(0,0,0)")
@@ -250,28 +433,27 @@ for i, partData in ipairs(parts) do
         math.rad(rot.X), math.rad(rot.Y), math.rad(rot.Z)
     )
     
-    local newPart = remote:InvokeServer("CreatePart", "Normal", cframe, char)
+    local newPart = remote:InvokeServer("CreatePart", "Normal", cframe, Player.Character)
     
     if newPart then
-        remote:InvokeServer("SyncResize", {{Part = newPart, Size = size, CFrame = cframe}})
-        remote:InvokeServer("SyncColor", {{Part = newPart, Color = color}})
-        remote:InvokeServer("SyncMaterial", {{Part = newPart, Material = material}})
+        FireMassiveSync("SyncResize", {{Part = newPart, Size = size, CFrame = cframe}})
+        FireMassiveSync("SyncColor", {{Part = newPart, Color = color}})
+        FireMassiveSync("SyncMaterial", {{Part = newPart, Material = material}})
+        FireMassiveSync("SyncShape", {{Part = newPart, Shape = shape}})
         
         if transparency > 0 then
-            remote:InvokeServer("SyncTransparency", {{Part = newPart, Transparency = transparency}})
+            FireMassiveSync("SyncTransparency", {{Part = newPart, Transparency = transparency}})
         end
         
-        -- Decal
         for key, value in pairs(partData) do
             local face = key:match("^Decal%.(%w+)$")
             if face then
-                remote:InvokeServer("CreateDecal", {{Part = newPart, Face = face, Texture = "rbxassetid://" .. value}})
+                FireMassiveSync("CreateDecal", {{Part = newPart, Face = face, Texture = "rbxassetid://" .. value}})
             end
         end
         
-        -- SpawnPoint
         if partData.SpawnPoint == "True" then
-            remote:InvokeServer("SetSpawn", {{Part = newPart}})
+            FireMassiveSync("SetSpawn", {{Part = newPart}})
         end
     end
     
@@ -282,12 +464,5 @@ for i, partData in ipairs(parts) do
     task.wait(0.03)
 end
 
--- آزاد کردن پلیر
-if char and char:FindFirstChild("HumanoidRootPart") then
-    char.HumanoidRootPart.Anchored = false
-end
-
-print("✅ ================================")
+SetFreeze(false)
 print("✅ مپ ساخته شد! " .. #parts .. " پارت")
-print("✅ عکس: 94436187842563")
-print("✅ ================================")
