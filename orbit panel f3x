@@ -1,0 +1,539 @@
+-- ============================================================
+-- 🎮 ARTA ORBIT PANEL - بلوک چرخان سرور-محور
+-- ============================================================
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local LocalPlayer = Players.LocalPlayer
+
+print("🎮 ARTA ORBIT PANEL در حال لود...")
+
+-- پیدا کردن F3X
+local tool
+for _, v in ipairs(LocalPlayer:GetDescendants()) do 
+    if v.Name == "SyncAPI" then tool = v.Parent break end 
+end
+if not tool then 
+    for _, v in ipairs(ReplicatedStorage:GetDescendants()) do 
+        if v.Name == "SyncAPI" then tool = v.Parent break end 
+    end 
+end
+if not tool or not tool:FindFirstChild("SyncAPI") then 
+    warn("❌ F3X پیدا نشد! F3X رو توی بازی باز کن") 
+    return 
+end
+
+local remote = tool.SyncAPI.ServerEndpoint
+print("✅ F3X پیدا شد!")
+
+-- ============================================================
+-- متغیرها
+-- ============================================================
+local OrbitBlock = nil
+local Angle = 0
+local RenderName = "ArtaOrbit_" .. tostring(math.random(1000, 9999))
+local IsActive = false
+
+local Settings = {
+    Color = Color3.fromRGB(0, 200, 255),
+    Speed = 3,
+    Radius = 6,
+    Height = 3,
+    Size = 2,
+    Material = Enum.Material.Neon,
+    LightEnabled = true,
+    Bobbing = true,
+}
+
+-- ============================================================
+-- ساخت بلوک
+-- ============================================================
+local function CreateOrbitBlock()
+    local char = LocalPlayer.Character
+    if not char then return end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    
+    local cframe = hrp.CFrame * CFrame.new(0, 5, 5)
+    local block = remote:InvokeServer("CreatePart", "Normal", cframe, char)
+    
+    if not block then
+        warn("❌ بلوک ساخته نشد")
+        return nil
+    end
+    
+    remote:InvokeServer("SyncResize", {{Part = block, Size = Vector3.new(Settings.Size, Settings.Size, Settings.Size), CFrame = cframe}})
+    remote:InvokeServer("SyncColor", {{Part = block, Color = Settings.Color}})
+    remote:InvokeServer("SyncMaterial", {{Part = block, Material = Settings.Material}})
+    remote:InvokeServer("SyncAnchor", {{Part = block, Anchored = true}})
+    remote:InvokeServer("SyncCollision", {{Part = block, CanCollide = false}})
+    
+    if Settings.LightEnabled then
+        remote:InvokeServer("CreateLight", {{Part = block, Color = Settings.Color, Range = 15, Brightness = 3}})
+    end
+    
+    return block
+end
+
+-- ============================================================
+-- شروع چرخش
+-- ============================================================
+local function StartOrbit()
+    if IsActive then return end
+    if not OrbitBlock then
+        OrbitBlock = CreateOrbitBlock()
+        if not OrbitBlock then return end
+    end
+    
+    IsActive = true
+    Angle = 0
+    
+    RunService:BindToRenderStep(RenderName, Enum.RenderPriority.Character.Value + 1, function(dt)
+        if not IsActive then return end
+        
+        local char = LocalPlayer.Character
+        if not char or not char.Parent then return end
+        local hrp = char:FindFirstChild("HumanoidRootPart")
+        if not hrp or not hrp.Parent then return end
+        if not OrbitBlock or not OrbitBlock.Parent then return end
+        
+        Angle = Angle + dt * Settings.Speed
+        
+        local offsetY = Settings.Height
+        if Settings.Bobbing then
+            offsetY = offsetY + math.sin(Angle * 2) * 1.5
+        end
+        
+        local offset = Vector3.new(
+            math.cos(Angle) * Settings.Radius,
+            offsetY,
+            math.sin(Angle) * Settings.Radius
+)
+        
+        local newCFrame = CFrame.new(hrp.Position + offset) * CFrame.Angles(Angle * 2, Angle * 3, Angle)
+        
+        pcall(function()
+            remote:InvokeServer("SyncMove", {{Part = OrbitBlock, CFrame = newCFrame}})
+        end)
+    end)
+    
+    print("✅ چرخش شروع شد! همه می‌بینن!")
+end
+
+-- ============================================================
+-- توقف چرخش
+-- ============================================================
+local function StopOrbit()
+    if not IsActive then return end
+    IsActive = false
+    RunService:UnbindFromRenderStep(RenderName)
+    
+    if OrbitBlock and OrbitBlock.Parent then
+        pcall(function()
+            remote:InvokeServer("Remove", {OrbitBlock})
+        end)
+    end
+    OrbitBlock = nil
+    print("⏸️ چرخش متوقف شد")
+end
+
+-- ============================================================
+-- UI
+-- ============================================================
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "ArtaOrbitPanel"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+-- دکمه باز
+local OpenBtn = Instance.new("TextButton")
+OpenBtn.Size = UDim2.new(0, 50, 0, 50)
+OpenBtn.Position = UDim2.new(0, 15, 0.4, 0)
+OpenBtn.Text = "🌌"
+OpenBtn.TextColor3 = Color3.fromRGB(0, 200, 255)
+OpenBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 25)
+OpenBtn.Font = Enum.Font.GothamBold
+OpenBtn.TextSize = 26
+OpenBtn.BorderSizePixel = 0
+OpenBtn.Parent = ScreenGui
+
+local openCorner = Instance.new("UICorner")
+openCorner.CornerRadius = UDim.new(0, 25)
+openCorner.Parent = OpenBtn
+
+local openStroke = Instance.new("UIStroke")
+openStroke.Color = Color3.fromRGB(0, 200, 255)
+openStroke.Thickness = 2
+openStroke.Parent = OpenBtn
+
+-- پنل اصلی (کوچیک)
+local Main = Instance.new("Frame")
+Main.Size = UDim2.new(0, 220, 0, 380)
+Main.Position = UDim2.new(0, 15, 0.5, -190)
+Main.BackgroundColor3 = Color3.fromRGB(15, 15, 25)
+Main.BorderSizePixel = 0
+Main.Visible = false
+Main.Parent = ScreenGui
+
+local mainCorner = Instance.new("UICorner")
+mainCorner.CornerRadius = UDim.new(0, 12)
+mainCorner.Parent = Main
+
+local mainStroke = Instance.new("UIStroke")
+mainStroke.Color = Color3.fromRGB(0, 200, 255)
+mainStroke.Thickness = 2
+mainStroke.Parent = Main
+
+-- هدر (کوچیک)
+local Header = Instance.new("TextLabel")
+Header.Size = UDim2.new(1, 0, 0, 38)
+Header.Text = "🌌 ARTA ORBIT"
+Header.TextColor3 = Color3.fromRGB(0, 200, 255)
+Header.BackgroundColor3 = Color3.fromRGB(25, 25, 40)
+Header.BackgroundTransparency = 0.2
+Header.Font = Enum.Font.GothamBlack
+Header.TextSize = 13
+Header.BorderSizePixel = 0
+Header.Parent = Main
+
+local headerCorner = Instance.new("UICorner")
+headerCorner.CornerRadius = UDim.new(0, 12)
+headerCorner.Parent = Header
+
+-- دکمه بستن
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Size = UDim2.new(0, 26, 0, 26)
+CloseBtn.Position = UDim2.new(1, -30, 0, 6)
+CloseBtn.Text = "✕"
+CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(220, 50, 50)
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.TextSize = 12
+CloseBtn.BorderSizePixel = 0
+CloseBtn.Parent = Header
+
+local closeCorner = Instance.new("UICorner")
+closeCorner.CornerRadius = UDim.new(0, 6)
+closeCorner.Parent = CloseBtn
+
+-- اسکرول
+local Scroll = Instance.new("ScrollingFrame")
+Scroll.Size = UDim2.new(1, -10, 1, -45)
+Scroll.Position = UDim2.new(0, 5, 0, 42)
+Scroll.BackgroundTransparency = 1
+Scroll.BorderSizePixel = 0
+Scroll.ScrollBarThickness = 3
+Scroll.ScrollBarImageColor3 = Color3.fromRGB(0, 200, 255)
+Scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+Scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+Scroll.Parent = Main
+
+local Layout = Instance.new("UIListLayout")
+Layout.Padding = UDim.new(0, 4)
+Layout.SortOrder = Enum.SortOrder.LayoutOrder
+Layout.Parent = Scroll
+
+-- ============================================================
+-- تابع ساخت لیبل
+-- ============================================================
+local function MakeLabel(text)
+    local lbl = Instance.new("TextLabel")
+    lbl.Size = UDim2.new(1, -6, 0, 18)
+    lbl.BackgroundTransparency = 1
+    lbl.Text = text
+    lbl.TextColor3 = Color3.fromRGB(150, 200, 255)
+    lbl.Font = Enum.Font.GothamBold
+    lbl.TextSize = 11
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
+    lbl.Parent = Scroll
+    return lbl
+end
+
+-- ============================================================
+-- تابع ساخت دکمه
+-- ============================================================
+local function MakeButton(text, callback)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, -6, 0, 30)
+    btn.BackgroundColor3 = Color3.fromRGB(35, 35, 55)
+    btn.Text = text
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Font = Enum.Font.GothamMedium
+    btn.TextSize = 11
+    btn.BorderSizePixel = 0
+    btn.Parent = Scroll
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 7)
+    corner.Parent = btn
+
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(0, 200, 255)
+    stroke.Thickness = 1
+    stroke.Transparency = 0.5
+    stroke.Parent = btn
+
+    btn.MouseButton1Click:Connect(function()
+        callback(btn, stroke)
+    end)
+
+    return btn
+end
+
+-- ============================================================
+-- 1. شروع/توقف
+-- ============================================================
+MakeButton("▶️ شروع چرخش", function(btn, stroke)
+    if not IsActive then
+        StartOrbit()
+        btn.Text = "⏸️ توقف چرخش"
+        btn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+        stroke.Color = Color3.fromRGB(255, 100, 100)
+    else
+        StopOrbit()
+        btn.Text = "▶️ شروع چرخش"
+        btn.BackgroundColor3 = Color3.fromRGB(35, 35, 55)
+        stroke.Color = Color3.fromRGB(0, 200, 255)
+    end
+end)
+
+-- ============================================================
+-- 2. رنگ
+-- ============================================================
+MakeLabel("🎨 رنگ")
+
+local Colors = {
+    {Name = "🔵 فیروزه‌ای", Color = Color3.fromRGB(0, 200, 255)},
+    {Name = "🔴 قرمز", Color = Color3.fromRGB(255, 50, 50)},
+    {Name = "🟢 سبز", Color = Color3.fromRGB(50, 255, 100)},
+    {Name = "🟡 زرد", Color = Color3.fromRGB(255, 220, 0)},
+    {Name = "🟣 بنفش", Color = Color3.fromRGB(180, 50, 255)},
+    {Name = "🌸 صورتی", Color = Color3.fromRGB(255, 100, 200)},
+    {Name = "⚪ سفید", Color = Color3.fromRGB(255, 255, 255)},
+    {Name = "🌈 رنگین‌کمون", Color = "rainbow"},
+}
+
+for _, c in ipairs(Colors) do
+    local btn = MakeButton(c.Name, function(b, s)
+        if c.Color == "rainbow" then
+            Settings.Color = "rainbow"
+            task.spawn(function()
+                while Settings.Color == "rainbow" and IsActive do
+                    local hue = (tick() * 0.3) % 1
+                    Settings.Color = Color3.fromHSV(hue, 1, 1)
+                    if OrbitBlock and OrbitBlock.Parent then
+                        pcall(function()
+                            remote:InvokeServer("SyncColor", {{Part = OrbitBlock, Color = Settings.Color}})
+                        end)
+                    end
+                    task.wait(0.05)
+                end
+            end)
+        else
+            Settings.Color = c.Color
+            if OrbitBlock and OrbitBlock.Parent then
+                pcall(function()
+                    remote:InvokeServer("SyncColor", {{Part = OrbitBlock, Color = Settings.Color}})
+                end)
+            end
+        end
+    end)
+    btn.BackgroundColor3 = c.Color == "rainbow" and Color3.fromRGB(100, 100, 200) or c.Color
+    btn.TextColor3 = Color3.fromRGB(0, 0, 0)
+end
+
+-- ============================================================
+-- 3. سرعت
+-- ============================================================
+MakeLabel("⚡ سرعت")
+
+local Speeds = {
+    {Name = "🐢 آهسته", Value = 1},
+    {Name = "🚶 متوسط", Value = 3},
+    {Name = "🏃 سریع", Value = 6},
+    {Name = "💨 خیلی سریع", Value = 12},
+    {Name = "⚡ دیوانه", Value = 25},
+}for _, s in ipairs(Speeds) do
+    MakeButton(s.Name, function()
+        Settings.Speed = s.Value
+    end)
+end
+
+-- ============================================================
+-- 4. شعاع
+-- ============================================================
+MakeLabel("📏 فاصله")
+
+local Radii = {
+    {Name = "نزدیک (4)", Value = 4},
+    {Name = "متوسط (8)", Value = 8},
+    {Name = "دور (15)", Value = 15},
+    {Name = "خیلی دور (25)", Value = 25},
+}
+
+for _, r in ipairs(Radii) do
+    MakeButton(r.Name, function()
+        Settings.Radius = r.Value
+    end)
+end
+
+-- ============================================================
+-- 5. ارتفاع
+-- ============================================================
+MakeLabel("⬆️ ارتفاع")
+
+local Heights = {
+    {Name = "پایین (1)", Value = 1},
+    {Name = "وسط (3)", Value = 3},
+    {Name = "بالا (6)", Value = 6},
+    {Name = "خیلی بالا (10)", Value = 10},
+}
+
+for _, h in ipairs(Heights) do
+    MakeButton(h.Name, function()
+        Settings.Height = h.Value
+    end)
+end
+
+-- ============================================================
+-- 6. اندازه
+-- ============================================================
+MakeLabel("🔷 اندازه")
+
+local Sizes = {
+    {Name = "کوچیک (1)", Value = 1},
+    {Name = "متوسط (2)", Value = 2},
+    {Name = "بزرگ (4)", Value = 4},
+    {Name = "خیلی بزرگ (8)", Value = 8},
+}
+
+for _, s in ipairs(Sizes) do
+    MakeButton(s.Name, function()
+        Settings.Size = s.Value
+        if OrbitBlock and OrbitBlock.Parent then
+            pcall(function()
+                remote:InvokeServer("SyncResize", {{Part = OrbitBlock, Size = Vector3.new(s.Value, s.Value, s.Value), CFrame = OrbitBlock.CFrame}})
+            end)
+        end
+    end)
+end
+
+-- ============================================================
+-- 7. متریال
+-- ============================================================
+MakeLabel("✨ متریال")
+
+local Materials = {
+    {Name = "💡 نئون", Value = Enum.Material.Neon},
+    {Name = "🔮 شیشه", Value = Enum.Material.Glass},
+    {Name = "💎 الماس", Value = Enum.Material.ForceField},
+    {Name = "🔩 فلز", Value = Enum.Material.Metal},
+    {Name = "🌟 براق", Value = Enum.Material.SmoothPlastic},
+}
+
+for _, m in ipairs(Materials) do
+    MakeButton(m.Name, function()
+        Settings.Material = m.Value
+        if OrbitBlock and OrbitBlock.Parent then
+            pcall(function()
+                remote:InvokeServer("SyncMaterial", {{Part = OrbitBlock, Material = m.Value}})
+            end)
+        end
+    end)
+end
+
+-- ============================================================
+-- 8. موج
+-- ============================================================
+MakeLabel("🌊 حرکات")
+
+MakeButton("🌊 موج بالا/پایین", function(btn, stroke)
+    Settings.Bobbing = not Settings.Bobbing
+    if Settings.Bobbing then
+        btn.BackgroundColor3 = Color3.fromRGB(50, 150, 200)
+        btn.Text = "🌊 موج | روشن"
+    else
+        btn.BackgroundColor3 = Color3.fromRGB(35, 35, 55)
+        btn.Text = "🌊 موج بالا/پایین"
+    end
+end)
+
+-- ============================================================
+-- 9. نور
+-- ============================================================
+MakeButton("💡 نور", function(btn, stroke)
+    Settings.LightEnabled = not Settings.LightEnabled
+    if Settings.LightEnabled then
+        btn.BackgroundColor3 = Color3.fromRGB(200, 180, 50)
+        btn.Text = "💡 نور | روشن"
+        if OrbitBlock and OrbitBlock.Parent then
+            pcall(function()
+                remote:InvokeServer("CreateLight", {{Part = OrbitBlock, Color = Settings.Color, Range = 15, Brightness = 3}})
+            end)
+        end
+    else
+        btn.BackgroundColor3 = Color3.fromRGB(35, 35, 55)
+        btn.Text = "💡 نور"
+        if OrbitBlock then
+            for _, child in pairs(OrbitBlock:GetChildren()) do
+                if child:IsA("PointLight") then
+                    pcall(function()
+                        remote:InvokeServer("Remove", {child})
+                    end)
+                end
+            end
+        end
+    end
+end)
+-- ============================================================
+-- 10. حذف کامل
+-- ============================================================
+MakeButton("🗑️ حذف کامل", function()
+    StopOrbit()
+    Settings.Color = Color3.fromRGB(0, 200, 255)
+end)
+
+-- ============================================================
+-- باز/بسته
+-- ============================================================
+OpenBtn.MouseButton1Click:Connect(function()
+    Main.Visible = true
+    OpenBtn.Visible = false
+end)
+
+CloseBtn.MouseButton1Click:Connect(function()
+    Main.Visible = false
+    OpenBtn.Visible = true
+end)
+
+-- Drag
+local dragging, dragStart, startPos
+Header.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = Main.Position
+    end
+end)
+
+Header.InputChanged:Connect(function(input)
+    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - dragStart
+        Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = false
+    end
+end)
+
+-- ============================================================
+-- شروع خودکار
+-- ============================================================
+task.wait(1)
+StartOrbit()
+print("✅ ARTA ORBIT PANEL آماده! 🌌")
