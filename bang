@@ -1,0 +1,11 @@
+--[[
+made by pwnmaster99 (@nightly_2222)
+gui2lua by @uniquadev
+Credits to:
+Moonhad
+Stevetherealone
+the guy with no name
+FeV
+]]
+
+loadstring(game:HttpGet("https://raw.githubusercontent.com/pwnmaster99/Scripts/refs/heads/main/US"))()
