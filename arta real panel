@@ -35,7 +35,11 @@ local HackNames = {
     "پرو کیک پنل",
     "SCP R6",
     "کوچیک کردن وسیله",
-    "کشتن همه با شمشیر"
+    "کشتن همه با شمشیر",
+    "فحش بدون سانسور",
+    "پرچم نازی",
+    "sky box f3x arta",
+    "panel Ss"
 }
 
 local HackLinks = {
@@ -54,7 +58,11 @@ local HackLinks = {
     "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/pro%20kick%20panel",
     "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/scp",
     "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/smal",
-    "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/sword%20kill%20all"
+    "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/sword%20kill%20all",
+    "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/scrpit",
+    "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/nazi%20scrpit",
+    "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/sky%20arta",
+    "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/panel%20ss"
 }
 
 local SkyCommands = {
@@ -66,9 +74,7 @@ local SkyCommands = {
     {Name = "اهنگ ۳", Cmd = {";music 85390427326662", ";volume 10", ";pitch 0.10"}},
     {Name = "آهنگ ۴", Cmd = {";music 1839246711", ";volume 10"}},
     {Name = "استوپ اهنگ", Cmd = {";stop"}}
-}
-
-local function PlayMusic()
+}local function PlayMusic()
     pcall(function()
         if MusicSound then MusicSound:Stop() MusicSound:Destroy() end
         if loopConn then loopConn:Disconnect() loopConn = nil end
@@ -91,6 +97,7 @@ local function StopMusic()
         if MusicSound then MusicSound:Stop() MusicSound:Destroy() MusicSound = nil end
     end)
 end
+
 local function SendChat(msg)
     pcall(function()
         local chat = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents")
@@ -182,7 +189,6 @@ LoginError.BackgroundTransparency = 1
 LoginError.Font = Enum.Font.SourceSans
 LoginError.TextSize = 14
 LoginError.Parent = LoginFrame
-
 -- ===== پنل اصلی =====
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0, 560, 0, 530)
@@ -297,7 +303,120 @@ SkyContent.BorderSizePixel = 0
 SkyContent.ScrollBarThickness = 6
 SkyContent.Visible = false
 SkyContent.Parent = MainFrame
+-- ===== پنل اصلی =====
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 560, 0, 530)
+MainFrame.Position = UDim2.new(1, -580, 0, 20)
+MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+MainFrame.BorderSizePixel = 0
+MainFrame.Visible = false
+MainFrame.Parent = ScreenGui
 
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 12)
+MainCorner.Parent = MainFrame
+
+local TitleBar = Instance.new("Frame")
+TitleBar.Size = UDim2.new(1, 0, 0, 35)
+TitleBar.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+TitleBar.BorderSizePixel = 0
+TitleBar.Parent = MainFrame
+
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(0.5, 0, 1, 0)
+Title.Position = UDim2.new(0, 10, 0, 0)
+Title.Text = "پنل اسکریپت‌ها"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.BackgroundTransparency = 1
+Title.Font = Enum.Font.SourceSansBold
+Title.TextSize = 18
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.Parent = TitleBar
+
+local ExitBtn = Instance.new("ImageButton")
+ExitBtn.Size = UDim2.new(0, 30, 0, 30)
+ExitBtn.Position = UDim2.new(1, -40, 0, 2)
+ExitBtn.BackgroundTransparency = 1
+ExitBtn.Image = "rbxassetid://91804512111491"
+ExitBtn.Parent = TitleBar
+
+local MinBtn = Instance.new("TextButton")
+MinBtn.Size = UDim2.new(0, 30, 0, 30)
+MinBtn.Position = UDim2.new(1, -75, 0, 2)
+MinBtn.Text = "−"
+MinBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+MinBtn.TextSize = 22
+MinBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 75)
+MinBtn.BorderSizePixel = 0
+MinBtn.Parent = TitleBar
+
+local MusicBtn = Instance.new("TextButton")
+MusicBtn.Size = UDim2.new(0, 55, 0, 30)
+MusicBtn.Position = UDim2.new(1, -140, 0, 2)
+MusicBtn.Text = "🎵 پلی"
+MusicBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+MusicBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 50)
+MusicBtn.BorderSizePixel = 0
+MusicBtn.Font = Enum.Font.SourceSansBold
+MusicBtn.TextSize = 13
+MusicBtn.Parent = TitleBar
+
+local StopBtn = Instance.new("TextButton")
+StopBtn.Size = UDim2.new(0, 55, 0, 30)
+StopBtn.Position = UDim2.new(1, -200, 0, 2)
+StopBtn.Text = "⏹️ استاپ"
+StopBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+StopBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+StopBtn.BorderSizePixel = 0
+StopBtn.Font = Enum.Font.SourceSansBold
+StopBtn.TextSize = 13
+StopBtn.Parent = TitleBar
+
+local TabFrame = Instance.new("Frame")
+TabFrame.Size = UDim2.new(1, 0, 0, 35)
+TabFrame.Position = UDim2.new(0, 0, 0, 35)
+TabFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+TabFrame.BorderSizePixel = 0
+TabFrame.Parent = MainFrame
+
+local Tab1 = Instance.new("TextButton")
+Tab1.Size = UDim2.new(0.5, -1, 1, 0)
+Tab1.Position = UDim2.new(0, 0, 0, 0)
+Tab1.Text = "اسکرپیت هک"
+Tab1.TextColor3 = Color3.fromRGB(255, 255, 255)
+Tab1.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
+Tab1.BorderSizePixel = 0
+Tab1.Font = Enum.Font.SourceSansBold
+Tab1.TextSize = 16
+Tab1.Parent = TabFrame
+
+local Tab2 = Instance.new("TextButton")
+Tab2.Size = UDim2.new(0.5, -1, 1, 0)
+Tab2.Position = UDim2.new(0.5, 1, 0, 0)
+Tab2.Text = "دکل و هوا"
+Tab2.TextColor3 = Color3.fromRGB(255, 255, 255)
+Tab2.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
+Tab2.BorderSizePixel = 0
+Tab2.Font = Enum.Font.SourceSansBold
+Tab2.TextSize = 16
+Tab2.Parent = TabFrame
+
+local HackContent = Instance.new("ScrollingFrame")
+HackContent.Size = UDim2.new(1, -10, 0, 395)
+HackContent.Position = UDim2.new(0, 5, 0, 75)
+HackContent.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+HackContent.BorderSizePixel = 0
+HackContent.ScrollBarThickness = 6
+HackContent.Parent = MainFrame
+
+local SkyContent = Instance.new("ScrollingFrame")
+SkyContent.Size = UDim2.new(1, -10, 0, 395)
+SkyContent.Position = UDim2.new(0, 5, 0, 75)
+SkyContent.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+SkyContent.BorderSizePixel = 0
+SkyContent.ScrollBarThickness = 6
+SkyContent.Visible = false
+SkyContent.Parent = MainFrame
 local function MakeHackBtns()
     local cols = 4
     local w = 0.22
@@ -317,7 +436,7 @@ local function MakeHackBtns()
         btn.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
         btn.BorderSizePixel = 0
         btn.Font = Enum.Font.SourceSans
-btn.TextSize = 11
+        btn.TextSize = 11
         btn.TextWrapped = true
         btn.Parent = HackContent
         
@@ -411,7 +530,7 @@ local function SwitchTab(tab)
     if tab == 1 then
         Tab1.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
         Tab2.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
-        HackContent.Visible = true
+HackContent.Visible = true
         SkyContent.Visible = false
     else
         Tab1.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
@@ -430,7 +549,7 @@ MinBtn.MouseButton1Click:Connect(function()
     if minimized then
         MainFrame.Size = UDim2.new(0, 560, 0, 50)
         MinBtn.Text = "+"
-Title.Visible = false
+        Title.Visible = false
         TabFrame.Visible = false
         HackContent.Visible = false
         SkyContent.Visible = false
