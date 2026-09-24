@@ -40,7 +40,8 @@ local HackNames = {
     "پرچم نازی",
     "sky box f3x arta",
     "panel Ss",
-    "ریل ارتا"
+    "ریل ارتا",
+    "اهنگ بعضی از بازی ها کار میده"
 }
 
 local HackLinks = {
@@ -64,7 +65,8 @@ local HackLinks = {
     "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/nazi%20scrpit",
     "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/sky%20arta",
     "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/panel%20ss",
-    "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/coolhace"
+    "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/coolhace",
+    "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/sang"
 }
 
 local SkyCommands = {
@@ -295,6 +297,8 @@ HackContent.Position = UDim2.new(0, 5, 0, 75)
 HackContent.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
 HackContent.BorderSizePixel = 0
 HackContent.ScrollBarThickness = 6
+HackContent.CanvasSize = UDim2.new(0, 0, 0, 0)
+HackContent.ScrollingDirection = Enum.ScrollingDirection.Y
 HackContent.Parent = MainFrame
 
 local SkyContent = Instance.new("ScrollingFrame")
@@ -303,14 +307,16 @@ SkyContent.Position = UDim2.new(0, 5, 0, 75)
 SkyContent.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
 SkyContent.BorderSizePixel = 0
 SkyContent.ScrollBarThickness = 6
+SkyContent.CanvasSize = UDim2.new(0, 0, 0, 0)
+SkyContent.ScrollingDirection = Enum.ScrollingDirection.Y
 SkyContent.Visible = false
 SkyContent.Parent = MainFrame
 local function MakeHackBtns()
-    local cols = 4
-    local w = 0.22
-    local h = 32
-    local gap = 5
-    local y = 5
+    local cols = 5
+    local w = 0.2
+    local h = 26
+    local gap = 3
+    local y = 4
     
     for i = 1, #HackNames do
         local col = (i - 1) % cols
@@ -318,22 +324,22 @@ local function MakeHackBtns()
         
         local btn = Instance.new("TextButton")
         btn.Size = UDim2.new(w, -gap, 0, h)
-        btn.Position = UDim2.new(col * (w + 0.015) + 0.01, 0, 0, y + row * (h + gap))
+        btn.Position = UDim2.new(col * w + 0.005, 0, 0, y + row * (h + gap))
         btn.Text = HackNames[i]
         btn.TextColor3 = Color3.fromRGB(255, 255, 255)
         btn.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
         btn.BorderSizePixel = 0
         btn.Font = Enum.Font.SourceSans
-        btn.TextSize = 11
+        btn.TextSize = 9
         btn.TextWrapped = true
         btn.Parent = HackContent
         
         local corner = Instance.new("UICorner")
-        corner.CornerRadius = UDim.new(0, 6)
+        corner.CornerRadius = UDim.new(0, 5)
         corner.Parent = btn
         
         btn.MouseButton1Click:Connect(function()
-            btn.Text = "دریافت..."
+            btn.Text = "..."
             btn.BackgroundColor3 = Color3.fromRGB(200, 150, 50)
             spawn(function()
                 local ok, res = FetchScript(HackLinks[i])
@@ -364,11 +370,11 @@ local function MakeHackBtns()
 end
 
 local function MakeSkyBtns()
-    local cols = 4
-    local w = 0.22
-    local h = 32
-    local gap = 5
-    local y = 5
+    local cols = 5
+    local w = 0.2
+    local h = 26
+    local gap = 3
+    local y = 4
     
     for i = 1, #SkyCommands do
         local col = (i - 1) % cols
@@ -376,22 +382,22 @@ local function MakeSkyBtns()
         
         local btn = Instance.new("TextButton")
         btn.Size = UDim2.new(w, -gap, 0, h)
-        btn.Position = UDim2.new(col * (w + 0.015) + 0.01, 0, 0, y + row * (h + gap))
+        btn.Position = UDim2.new(col * w + 0.005, 0, 0, y + row * (h + gap))
         btn.Text = SkyCommands[i].Name
         btn.TextColor3 = Color3.fromRGB(255, 255, 255)
         btn.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
         btn.BorderSizePixel = 0
         btn.Font = Enum.Font.SourceSans
-        btn.TextSize = 11
+        btn.TextSize = 9
         btn.TextWrapped = true
         btn.Parent = SkyContent
         
         local corner = Instance.new("UICorner")
-        corner.CornerRadius = UDim.new(0, 6)
+        corner.CornerRadius = UDim.new(0, 5)
         corner.Parent = btn
         
         btn.MouseButton1Click:Connect(function()
-            btn.Text = "ارسال..."
+            btn.Text = "..."
             btn.BackgroundColor3 = Color3.fromRGB(200, 150, 50)
             spawn(function()
                 for _, cmd in ipairs(SkyCommands[i].Cmd) do
@@ -418,7 +424,7 @@ local function SwitchTab(tab)
     if tab == 1 then
         Tab1.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
         Tab2.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
-HackContent.Visible = true
+        HackContent.Visible = true
         SkyContent.Visible = false
     else
         Tab1.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
@@ -427,7 +433,6 @@ HackContent.Visible = true
         SkyContent.Visible = true
     end
 end
-
 Tab1.MouseButton1Click:Connect(function() SwitchTab(1) end)
 Tab2.MouseButton1Click:Connect(function() SwitchTab(2) end)
 
