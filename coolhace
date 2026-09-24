@@ -103,7 +103,7 @@ Part 5:
  Color: 0.639216, 0.635294, 0.647059
  Material: Fabric
  Transparency: 0.00
- Decal.Left = 122714132204276
+ Decal.Left = 94436187842563
 
 Part 6:
  Position: (79.50, 65.50, 115.00)
@@ -1546,7 +1546,7 @@ Part 165:
  Color: 0.639216, 0.635294, 0.647059
  Material: Fabric
  Transparency: 0.00
- Decal.Right = 122714132204276
+ Decal.Right = 94436187842563
 
 Part 166:
  Position: (17.00, -10.00, -11.50)
