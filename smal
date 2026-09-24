@@ -112,6 +112,7 @@ ShapeBtn.TextColor3 = Color3.fromRGB(255, 76, 76)
 ShapeBtn.TextSize = 16
 ShapeBtn.Font = Enum.Font.SourceSansBold
 ShapeBtn.TextXAlignment = Enum.TextXAlignment.Right
+
 ModeLabel.Parent = MainFrame
 ModeLabel.Position = UDim2.new(0, 15, 0, 145)
 ModeLabel.Size = UDim2.new(0, 70, 0, 30)
@@ -230,6 +231,7 @@ local lastAppliedReach = -1
 local lastAppliedMode = ""
 local lastAppliedShape = ""
 local lastTool = nil
+
 local function restoreObject(obj)
     if obj and originalProperties[obj] then
         local props = originalProperties[obj]
@@ -347,7 +349,9 @@ game:GetService("RunService").RenderStepped:Connect(function()
                 lastAppliedReach = reach
                 lastAppliedMode = "Enlarge Tool"
                 lastAppliedShape = reachType
-                lastTool = sif not originalProperties[handle] then
+                lastTool = s
+
+                if not originalProperties[handle] then
                     local existingMesh = handle:FindFirstChildOfClass("SpecialMesh")
                     originalProperties[handle] = {
                         Size = handle.Size,
@@ -429,7 +433,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
             if reachType == "Sphere" then
                 visualizer.Shape = Enum.PartType.Ball
                 visualizer.Size = Vector3.new(reach, reach, reach)
-visualizer.CFrame = handle.CFrame
+                visualizer.CFrame = handle.CFrame
                 
                 for _,v in pairs(game.Players:GetPlayers()) do
                     local hrp = v.Character and v.Character:FindFirstChild("HumanoidRootPart")
