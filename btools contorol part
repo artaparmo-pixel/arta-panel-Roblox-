@@ -1,0 +1,534 @@
+-- ============================================================
+-- 🎮 ARTA PART CONTROLLER v4 - انتخاب پارت جدید
+-- ============================================================
+
+print("🎮 ARTA PART CONTROLLER v4 در حال لود...")
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UserInputService = game:GetService("UserInputService")
+local LocalPlayer = Players.LocalPlayer
+
+-- پیدا کردن F3X
+local tool
+for _, v in ipairs(LocalPlayer:GetDescendants()) do 
+    if v.Name == "SyncAPI" then tool = v.Parent break end 
+end
+if not tool then 
+    for _, v in ipairs(ReplicatedStorage:GetDescendants()) do 
+        if v.Name == "SyncAPI" then tool = v.Parent break end 
+    end 
+end
+if not tool or not tool:FindFirstChild("SyncAPI") then 
+    warn("❌ F3X پیدا نشد!") 
+    return 
+end
+
+local remote = tool.SyncAPI.ServerEndpoint
+print("✅ F3X پیدا شد!")
+
+-- کاراکتر
+local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local humanoid = char:WaitForChild("Humanoid")
+local hrp = char:WaitForChild("HumanoidRootPart")
+
+-- متغیرها
+local ControlledPart = nil
+local LastPart = nil        -- پارتی که قبلاً انتخاب شده (برای نادیده گرفتن)
+local MoveStep = 3
+local RotateStep = 15
+
+-- ============================================================
+-- انتخاب پارت (نسخه اصلاح شده)
+-- ============================================================
+local function SelectPart()
+    local closest = nil
+    local minDist = 50
+    
+    for _, part in pairs(workspace:GetDescendants()) do
+        if part:IsA("BasePart") then
+            -- کاراکترها رو نادیده بگیر
+            local isChar = false
+            if part.Parent and part.Parent:FindFirstChildOfClass("Humanoid") then
+                isChar = true
+            end
+            
+            -- پارتی که قبلاً انتخاب شده رو نادیده بگیر
+            if not isChar and part ~= LastPart then
+                local dist = (part.Position - hrp.Position).Magnitude
+                if dist < minDist then
+                    minDist = dist
+                    closest = part
+                end
+            end
+        end
+    end
+    
+    -- اگه پارت جدید پیدا شد
+    if closest then
+        LastPart = closest
+        print("✅ پارت جدید: " .. closest.Name .. " | فاصله: " .. math.floor(minDist))
+        return closest
+    end
+    
+    -- اگه پارتی پیدا نشد، همه رو بگرد (حتی قبلی)
+    for _, part in pairs(workspace:GetDescendants()) do
+        if part:IsA("BasePart") then
+            local isChar = false
+            if part.Parent and part.Parent:FindFirstChildOfClass("Humanoid") then
+                isChar = true
+            end
+            
+            if not isChar then
+                local dist = (part.Position - hrp.Position).Magnitude
+                if dist < minDist then
+                    minDist = dist
+                    closest = part
+                end
+            end
+        end
+    end
+    
+    if closest then
+        LastPart = closest
+        print("✅ پارت (دور): " .. closest.Name)
+    end
+    
+    return closest
+end
+
+-- ============================================================
+-- کنترل پارت
+-- ============================================================
+local function MovePart(offset)
+    if not ControlledPart or not ControlledPart.Parent then return end
+    local newCF = ControlledPart.CFrame + offset
+    pcall(function()
+        remote:InvokeServer("SyncMove", {{Part = ControlledPart, CFrame = newCF}})
+    end)
+end
+
+local function RotatePart(angle)
+    if not ControlledPart or not ControlledPart.Parent then return end
+    local newCF = ControlledPart.CFrame * CFrame.Angles(0, math.rad(angle), 0)
+    pcall(function()
+        remote:InvokeServer("SyncMove", {{Part = ControlledPart, CFrame = newCF}})
+    end)
+end
+
+local function MovePartUp(amount)
+    if not ControlledPart or not ControlledPart.Parent then return end
+    local newCF = ControlledPart.CFrame + Vector3.new(0, amount, 0)
+    pcall(function()
+        remote:InvokeServer("SyncMove", {{Part = ControlledPart, CFrame = newCF}})
+    end)
+end
+local function ResizePart(amount)
+    if not ControlledPart or not ControlledPart.Parent then return end
+    local newSize = ControlledPart.Size + Vector3.new(amount, amount, amount)
+    if newSize.X < 1 then newSize = Vector3.new(1, 1, 1) end
+    if newSize.X > 50 then newSize = Vector3.new(50, 50, 50) end
+    pcall(function()
+        remote:InvokeServer("SyncResize", {{Part = ControlledPart, Size = newSize, CFrame = ControlledPart.CFrame}})
+    end)
+end
+
+local function ColorPart(color)
+    if not ControlledPart or not ControlledPart.Parent then return end
+    pcall(function()
+        remote:InvokeServer("SyncColor", {{Part = ControlledPart, Color = color}})
+    end)
+end
+
+local function DeletePart()
+    if ControlledPart and ControlledPart.Parent then
+        pcall(function()
+            remote:InvokeServer("Remove", {ControlledPart})
+        end)
+        ControlledPart = nil
+    end
+end
+
+local function FacePlayer()
+    if not ControlledPart or not ControlledPart.Parent then return end
+    local myHrp = char:FindFirstChild("HumanoidRootPart")
+    if not myHrp then return end
+    local newCF = CFrame.new(ControlledPart.Position, myHrp.Position)
+    pcall(function()
+        remote:InvokeServer("SyncMove", {{Part = ControlledPart, CFrame = newCF}})
+    end)
+end
+
+-- ============================================================
+-- UI - پنل کوچیک
+-- ============================================================
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "ArtaPartController"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.DisplayOrder = 999999
+ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+-- دکمه باز
+local OpenBtn = Instance.new("TextButton")
+OpenBtn.Size = UDim2.new(0, 55, 0, 55)
+OpenBtn.Position = UDim2.new(0, 15, 0.4, 0)
+OpenBtn.Text = "🎮"
+OpenBtn.TextColor3 = Color3.fromRGB(0, 200, 255)
+OpenBtn.BackgroundColor3 = Color3.fromRGB(10, 15, 25)
+OpenBtn.Font = Enum.Font.GothamBlack
+OpenBtn.TextSize = 26
+OpenBtn.BorderSizePixel = 0
+OpenBtn.Parent = ScreenGui
+
+local oc = Instance.new("UICorner")
+oc.CornerRadius = UDim.new(0, 28)
+oc.Parent = OpenBtn
+
+local os = Instance.new("UIStroke")
+os.Color = Color3.fromRGB(0, 200, 255)
+os.Thickness = 2
+os.Parent = OpenBtn
+
+-- پنل اصلی
+local Main = Instance.new("Frame")
+Main.Size = UDim2.new(0, 260, 0, 420)
+Main.Position = UDim2.new(0, 15, 0.5, -210)
+Main.BackgroundColor3 = Color3.fromRGB(10, 15, 25)
+Main.BorderSizePixel = 0
+Main.Visible = false
+Main.Parent = ScreenGui
+
+local mc = Instance.new("UICorner")
+mc.CornerRadius = UDim.new(0, 12)
+mc.Parent = Main
+
+local ms = Instance.new("UIStroke")
+ms.Color = Color3.fromRGB(0, 200, 255)
+ms.Thickness = 2
+ms.Parent = Main
+
+-- هدر
+local Header = Instance.new("TextLabel")
+Header.Size = UDim2.new(1, 0, 0, 38)
+Header.Text = "🎮 ARTA PART"
+Header.TextColor3 = Color3.fromRGB(0, 200, 255)
+Header.BackgroundColor3 = Color3.fromRGB(15, 25, 40)
+Header.BackgroundTransparency = 0.1
+Header.Font = Enum.Font.GothamBlack
+Header.TextSize = 12
+Header.BorderSizePixel = 0
+Header.Parent = Main
+
+local hc = Instance.new("UICorner")
+hc.CornerRadius = UDim.new(0, 12)
+hc.Parent = Header
+
+-- دکمه بستن
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Size = UDim2.new(0, 26, 0, 26)
+CloseBtn.Position = UDim2.new(1, -30, 0, 6)
+CloseBtn.Text = "✕"
+CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(220, 50, 50)
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.TextSize = 12
+CloseBtn.BorderSizePixel = 0
+CloseBtn.Parent = Header
+
+local cc = Instance.new("UICorner")
+cc.CornerRadius = UDim.new(0, 6)
+cc.Parent = CloseBtn
+
+-- استاتوس
+local Status = Instance.new("TextLabel")
+Status.Size = UDim2.new(1, -16, 0, 22)
+Status.Position = UDim2.new(0, 8, 0, 42)
+Status.BackgroundColor3 = Color3.fromRGB(20, 30, 45)
+Status.Text = "❌ پارتی انتخاب نشده"
+Status.TextColor3 = Color3.fromRGB(255, 100, 100)
+Status.Font = Enum.Font.GothamBold
+Status.TextSize = 10
+Status.BorderSizePixel = 0
+Status.Parent = Main
+
+local sc = Instance.new("UICorner")
+sc.CornerRadius = UDim.new(0, 6)
+sc.Parent = Status
+-- آپدیت استاتوس
+local function UpdateStatus()
+    if ControlledPart and ControlledPart.Parent then
+        Status.Text = "✅ " .. ControlledPart.Name
+        Status.TextColor3 = Color3.fromRGB(100, 255, 100)
+    else
+        Status.Text = "❌ پارتی انتخاب نشده"
+        Status.TextColor3 = Color3.fromRGB(255, 100, 100)
+    end
+end
+
+-- دکمه انتخاب
+local SelectBtn = Instance.new("TextButton")
+SelectBtn.Size = UDim2.new(1, -16, 0, 32)
+SelectBtn.Position = UDim2.new(0, 8, 0, 68)
+SelectBtn.BackgroundColor3 = Color3.fromRGB(50, 100, 200)
+SelectBtn.Text = "📍 انتخاب پارت (بار اول)"
+SelectBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+SelectBtn.Font = Enum.Font.GothamBold
+SelectBtn.TextSize = 11
+SelectBtn.BorderSizePixel = 0
+SelectBtn.Parent = Main
+
+local selc = Instance.new("UICorner")
+selc.CornerRadius = UDim.new(0, 6)
+selc.Parent = SelectBtn
+
+SelectBtn.MouseButton1Click:Connect(function()
+    ControlledPart = SelectPart()
+    UpdateStatus()
+end)
+
+-- ============================================================
+-- دکمه‌های کنترل
+-- ============================================================
+local function MakeControlBtn(text, pos, color, callback)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0, 55, 0, 55)
+    btn.Position = pos
+    btn.BackgroundColor3 = color
+    btn.Text = text
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Font = Enum.Font.GothamBlack
+    btn.TextSize = 22
+    btn.BorderSizePixel = 0
+    btn.ZIndex = 2
+    btn.Parent = Main
+
+    local c = Instance.new("UICorner")
+    c.CornerRadius = UDim.new(0, 10)
+    c.Parent = btn
+
+    local s = Instance.new("UIStroke")
+    s.Color = Color3.fromRGB(0, 200, 255)
+    s.Thickness = 1
+    s.Transparency = 0.5
+    s.Parent = btn
+
+    btn.MouseButton1Click:Connect(function()
+        callback()
+    end)
+
+    return btn
+end
+
+-- ⬆️ جلو
+MakeControlBtn("⬆️", UDim2.new(0.5, -27, 0, 108), Color3.fromRGB(50, 100, 200), function()
+    MovePart(Vector3.new(0, 0, -MoveStep))
+end)
+
+-- ⬅️ چپ
+MakeControlBtn("⬅️", UDim2.new(0.5, -90, 0, 168), Color3.fromRGB(50, 100, 200), function()
+    MovePart(Vector3.new(-MoveStep, 0, 0))
+end)
+
+-- ➡️ راست
+MakeControlBtn("➡️", UDim2.new(0.5, 36, 0, 168), Color3.fromRGB(50, 100, 200), function()
+    MovePart(Vector3.new(MoveStep, 0, 0))
+end)
+
+-- ⬇️ عقب
+MakeControlBtn("⬇️", UDim2.new(0.5, -27, 0, 228), Color3.fromRGB(50, 100, 200), function()
+    MovePart(Vector3.new(0, 0, MoveStep))
+end)
+
+-- ⤴️ بالا
+MakeControlBtn("⤴️", UDim2.new(0.5, -90, 0, 108), Color3.fromRGB(50, 150, 50), function()
+    MovePartUp(MoveStep)
+end)
+
+-- ⤵️ پایین
+MakeControlBtn("⤵️", UDim2.new(0.5, 36, 0, 108), Color3.fromRGB(150, 50, 50), function()
+    MovePartUp(-MoveStep)
+end)
+
+-- ↺ چرخش چپ
+MakeControlBtn("↺", UDim2.new(0.5, -90, 0, 228), Color3.fromRGB(150, 50, 200), function()
+    RotatePart(-RotateStep)
+end)
+
+-- ↻ چرخش راست
+MakeControlBtn("↻", UDim2.new(0.5, 36, 0, 228), Color3.fromRGB(150, 50, 200), function()
+    RotatePart(RotateStep)
+end)
+
+-- ============================================================
+-- ابزار
+-- ============================================================
+local ToolLabel = Instance.new("TextLabel")
+ToolLabel.Size = UDim2.new(1, -16, 0, 18)
+ToolLabel.Position = UDim2.new(0, 8, 0, 292)
+ToolLabel.BackgroundTransparency = 1
+ToolLabel.Text = "🛠️ ابزار:"
+ToolLabel.TextColor3 = Color3.fromRGB(150, 200, 255)
+ToolLabel.Font = Enum.Font.GothamBold
+ToolLabel.TextSize = 10
+ToolLabel.TextXAlignment = Enum.TextXAlignment.Left
+ToolLabel.Parent = Main
+
+-- 🔍 بزرگ
+local BiggerBtn = Instance.new("TextButton")
+BiggerBtn.Size = UDim2.new(0.48, -10, 0, 32)
+BiggerBtn.Position = UDim2.new(0, 8, 0, 312)
+BiggerBtn.BackgroundColor3 = Color3.fromRGB(100, 100, 200)
+BiggerBtn.Text = "🔍 بزرگ"
+BiggerBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+BiggerBtn.Font = Enum.Font.GothamBold
+BiggerBtn.TextSize = 10
+BiggerBtn.BorderSizePixel = 0
+BiggerBtn.Parent = Main
+
+local bc = Instance.new("UICorner")
+bc.CornerRadius = UDim.new(0, 6)
+bc.Parent = BiggerBtn
+
+BiggerBtn.MouseButton1Click:Connect(function()
+    ResizePart(1)
+end)
+-- 🔍 کوچیک
+local SmallerBtn = Instance.new("TextButton")
+SmallerBtn.Size = UDim2.new(0.48, -10, 0, 32)
+SmallerBtn.Position = UDim2.new(0.52, 0, 0, 312)
+SmallerBtn.BackgroundColor3 = Color3.fromRGB(100, 100, 200)
+SmallerBtn.Text = "🔍 کوچیک"
+SmallerBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+SmallerBtn.Font = Enum.Font.GothamBold
+SmallerBtn.TextSize = 10
+SmallerBtn.BorderSizePixel = 0
+SmallerBtn.Parent = Main
+
+local smc = Instance.new("UICorner")
+smc.CornerRadius = UDim.new(0, 6)
+smc.Parent = SmallerBtn
+
+SmallerBtn.MouseButton1Click:Connect(function()
+    ResizePart(-1)
+end)
+
+-- 🎯 به سمتم بچرخ
+local FaceBtn = Instance.new("TextButton")
+FaceBtn.Size = UDim2.new(1, -16, 0, 32)
+FaceBtn.Position = UDim2.new(0, 8, 0, 350)
+FaceBtn.BackgroundColor3 = Color3.fromRGB(150, 100, 0)
+FaceBtn.Text = "🎯 به سمتم بچرخ"
+FaceBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+FaceBtn.Font = Enum.Font.GothamBold
+FaceBtn.TextSize = 10
+FaceBtn.BorderSizePixel = 0
+FaceBtn.Parent = Main
+
+local fc = Instance.new("UICorner")
+fc.CornerRadius = UDim.new(0, 6)
+fc.Parent = FaceBtn
+
+FaceBtn.MouseButton1Click:Connect(function()
+    FacePlayer()
+end)
+
+-- 🗑️ حذف پارت
+local DelBtn = Instance.new("TextButton")
+DelBtn.Size = UDim2.new(1, -16, 0, 32)
+DelBtn.Position = UDim2.new(0, 8, 0, 388)
+DelBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+DelBtn.Text = "🗑️ حذف پارت"
+DelBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+DelBtn.Font = Enum.Font.GothamBold
+DelBtn.TextSize = 10
+DelBtn.BorderSizePixel = 0
+DelBtn.Parent = Main
+
+local dc = Instance.new("UICorner")
+dc.CornerRadius = UDim.new(0, 6)
+dc.Parent = DelBtn
+
+DelBtn.MouseButton1Click:Connect(function()
+    DeletePart()
+    UpdateStatus()
+end)
+
+-- ============================================================
+-- رنگ‌ها
+-- ============================================================
+local ColorLabel = Instance.new("TextLabel")
+ColorLabel.Size = UDim2.new(1, -16, 0, 18)
+ColorLabel.Position = UDim2.new(0, 8, 0, 425)
+ColorLabel.BackgroundTransparency = 1
+ColorLabel.Text = "🎨 رنگ:"
+ColorLabel.TextColor3 = Color3.fromRGB(150, 200, 255)
+ColorLabel.Font = Enum.Font.GothamBold
+ColorLabel.TextSize = 10
+ColorLabel.TextXAlignment = Enum.TextXAlignment.Left
+ColorLabel.Parent = Main
+
+local colors = {
+    {color = Color3.fromRGB(255, 50, 50)},
+    {color = Color3.fromRGB(50, 255, 50)},
+    {color = Color3.fromRGB(50, 100, 255)},
+    {color = Color3.fromRGB(255, 255, 50)},
+    {color = Color3.fromRGB(200, 50, 255)},
+    {color = Color3.fromRGB(255, 255, 255)},
+}
+
+for i, c in ipairs(colors) do
+    local colorBtn = Instance.new("TextButton")
+    colorBtn.Size = UDim2.new(0, 32, 0, 28)
+    colorBtn.Position = UDim2.new(0, 8 + (i - 1) * 38, 0, 442)
+    colorBtn.BackgroundColor3 = c.color
+    colorBtn.Text = ""
+    colorBtn.BorderSizePixel = 0
+    colorBtn.Parent = Main
+
+    local cbtn = Instance.new("UICorner")
+    cbtn.CornerRadius = UDim.new(0, 6)
+    cbtn.Parent = colorBtn
+
+    colorBtn.MouseButton1Click:Connect(function()
+        ColorPart(c.color)
+    end)
+end
+
+-- ============================================================
+-- باز/بسته
+-- ============================================================
+OpenBtn.MouseButton1Click:Connect(function()
+    Main.Visible = true
+    OpenBtn.Visible = false
+    UpdateStatus()
+end)
+
+CloseBtn.MouseButton1Click:Connect(function()
+    Main.Visible = false
+    OpenBtn.Visible = true
+end)
+
+-- Drag
+local dragging, dragStart, startPos
+Header.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = Main.Position
+    end
+end)
+
+Header.InputChanged:Connect(function(input)
+    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - dragStart
+        Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = false
+    end
+end)
+
+print("✅ ARTA PART CONTROLLER v4 آماده! 🎮")
+print("📌 هر بار 'انتخاب پارت' بزنی، پارت جدید انتخاب میشه")
