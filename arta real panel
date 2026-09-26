@@ -20,7 +20,7 @@ local loopConn = nil
 
 -- ⚠️ اسکریپت‌های پنل
 local HackNames = {
-    "پک دنس آرتا",
+    "پک دنس",
     "F3X Crab",
     "کنترل نوب با F3X",
     "۹۹ نایت",
@@ -38,10 +38,11 @@ local HackNames = {
     "کشتن همه با شمشیر",
     "فحش بدون سانسور",
     "پرچم نازی",
-    "sky box f3x arta",
+    "sky box f3x",
     "panel Ss",
-    "ریل ارتا",
-    "اهنگ بعضی از بازی ها کار میده"
+    "ریل",
+    "اهنگ بعضی از بازی ها کار میده",
+    "بتولز کنترل پارت سروساید"
 }
 
 local HackLinks = {
@@ -66,19 +67,22 @@ local HackLinks = {
     "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/sky%20arta",
     "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/panel%20ss",
     "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/coolhace",
-    "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/sang"
+    "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/sang",
+    "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/btools%20contorol%20part"
 }
 
 local SkyCommands = {
     {Name = "اهنگ", Cmd = {";music 133732492604303", ";volume 10"}},
     {Name = "دکل", Cmd = {";skybox 91804512111491"}},
     {Name = "سیگار", Cmd = {";script require(122168186720709).roko(\"Arta139296\")"}},
-    {Name = "بمب اتم", Cmd = {";script require(4867426485):SD2(\"Arta139296\")"}},
+{Name = "بمب اتم", Cmd = {";script require(4867426485):SD2(\"Arta139296\")"}},
     {Name = "اهنگ ۲", Cmd = {";music 6129291390", ";volume 10"}},
     {Name = "اهنگ ۳", Cmd = {";music 85390427326662", ";volume 10", ";pitch 0.10"}},
     {Name = "آهنگ ۴", Cmd = {";music 1839246711", ";volume 10"}},
     {Name = "استوپ اهنگ", Cmd = {";stop"}}
-}local function PlayMusic()
+}
+
+local function PlayMusic()
     pcall(function()
         if MusicSound then MusicSound:Stop() MusicSound:Destroy() end
         if loopConn then loopConn:Disconnect() loopConn = nil end
@@ -183,7 +187,6 @@ LoginBtn.BorderSizePixel = 0
 LoginBtn.Font = Enum.Font.SourceSansBold
 LoginBtn.TextSize = 16
 LoginBtn.Parent = LoginFrame
-
 local LoginError = Instance.new("TextLabel")
 LoginError.Size = UDim2.new(0.8, 0, 0, 20)
 LoginError.Position = UDim2.new(0.1, 0, 0.55, 0)
@@ -193,6 +196,7 @@ LoginError.BackgroundTransparency = 1
 LoginError.Font = Enum.Font.SourceSans
 LoginError.TextSize = 14
 LoginError.Parent = LoginFrame
+
 -- ===== پنل اصلی =====
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0, 560, 0, 530)
@@ -300,7 +304,6 @@ HackContent.ScrollBarThickness = 6
 HackContent.CanvasSize = UDim2.new(0, 0, 0, 0)
 HackContent.ScrollingDirection = Enum.ScrollingDirection.Y
 HackContent.Parent = MainFrame
-
 local SkyContent = Instance.new("ScrollingFrame")
 SkyContent.Size = UDim2.new(1, -10, 0, 395)
 SkyContent.Position = UDim2.new(0, 5, 0, 75)
@@ -311,6 +314,7 @@ SkyContent.CanvasSize = UDim2.new(0, 0, 0, 0)
 SkyContent.ScrollingDirection = Enum.ScrollingDirection.Y
 SkyContent.Visible = false
 SkyContent.Parent = MainFrame
+
 local function MakeHackBtns()
     local cols = 5
     local w = 0.2
@@ -419,7 +423,6 @@ end
 
 MakeHackBtns()
 MakeSkyBtns()
-
 local function SwitchTab(tab)
     if tab == 1 then
         Tab1.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
@@ -433,6 +436,7 @@ local function SwitchTab(tab)
         SkyContent.Visible = true
     end
 end
+
 Tab1.MouseButton1Click:Connect(function() SwitchTab(1) end)
 Tab2.MouseButton1Click:Connect(function() SwitchTab(2) end)
 
