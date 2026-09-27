@@ -1,0 +1,525 @@
+local Settings = {
+    AimbotEnabled = true,
+    FOV = 150,
+    Smoothness = 0.5,
+    WallhackEnabled = true,
+    TargetPart = "Head",
+    VisibleCheck = true,
+    ShowFOV = true
+}
+
+-- =================== FRIEND LIST ===================
+local FriendList = {}
+
+-- =================== TARGET SETTINGS ===================
+local TargetParts = {"Head", "Torso"}
+local TargetIndex = 1
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+local raycastParams = RaycastParams.new()
+raycastParams.FilterType = Enum.RaycastFilterType.Exclude
+
+-- =================== CYCLE TARGET ===================
+local function CycleTarget()
+    TargetIndex = TargetIndex % #TargetParts + 1
+    Settings.TargetPart = TargetParts[TargetIndex]
+    if TargetBtn then
+        TargetBtn.Text = "Target: " .. Settings.TargetPart
+    end
+    print("Target changed to: " .. Settings.TargetPart)
+end
+
+-- =================== WALLCHECK ===================
+local function isVisible(targetCharacter)
+    if not Settings.VisibleCheck then return true end
+    local targetPart = targetCharacter:FindFirstChild(Settings.TargetPart)
+    if not targetPart then return false end
+    
+    raycastParams.FilterDescendantsInstances = {LocalPlayer.Character, targetCharacter}
+    local camPos = Camera.CFrame.Position
+    local raycastResult = workspace:Raycast(camPos, (targetPart.Position - camPos), raycastParams)
+    
+    return raycastResult == nil
+end
+
+-- =================== FRIEND CHECK ===================
+local function isFriend(player)
+    for _, friendName in pairs(FriendList) do
+        if player.Name == friendName then
+            return true
+        end
+    end
+    return false
+end
+
+-- =================== AIMBOT LOGIC ===================
+local function getClosestPlayer()
+    local closestPlayer = nil
+    local shortestDistance = Settings.FOV
+
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character then
+            -- SKIP IF FRIEND
+            if isFriend(player) then
+                continue
+            end
+            
+            local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+            if not humanoid or humanoid.Health <= 0 then continue end
+            
+            local targetPart = player.Character:FindFirstChild(Settings.TargetPart)
+            if not targetPart then 
+                targetPart = player.Character:FindFirstChild("HumanoidRootPart")
+                if not targetPart then continue end
+            end
+            
+            local screenPos, onScreen = Camera:WorldToViewportPoint(targetPart.Position)
+            if onScreen then
+                local mousePos = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+                local distance = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
+                
+                if distance < shortestDistance then
+                    if isVisible(player.Character) then
+                        shortestDistance = distance
+                        closestPlayer = player
+                    end
+                end
+            end
+        end
+    end
+    return closestPlayer
+end
+
+-- =================== UPDATE PLAYER ===================
+local function updatePlayerHighlight(player)
+    if player == LocalPlayer then return end
+    local char = player.Character
+    if not char then return end
+    
+    -- Remove old highlight
+    if char:FindFirstChild("DeltaWH") then
+        char.DeltaWH:Destroy()
+    end
+    
+    -- If Wallhack is off, do nothing
+    if not Settings.WallhackEnabled then return end
+    
+    -- Check if player is a friend
+    local isFriendPlayer = isFriend(player)
+    
+    -- Create new highlight
+    local hl = Instance.new("Highlight")
+    hl.Name = "DeltaWH"
+    
+    if isFriendPlayer then
+        -- FRIEND: Green with dark outline
+        hl.FillColor = Color3.fromRGB(0, 255, 0)
+        hl.OutlineColor = Color3.fromRGB(20, 20, 20) -- dark border
+        hl.FillTransparency = 0.3
+        hl.OutlineTransparency = 0
+    else
+        -- ENEMY: Red with white outline (default)
+        hl.FillColor = Color3.fromRGB(255, 0, 0)
+        hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+        hl.FillTransparency = 0.5
+        hl.OutlineTransparency = 0
+    end
+    
+    hl.Adornee = char
+    hl.Parent = char
+end
+
+-- =================== ESP ===================
+local function applyHighlight(player)
+    if player == LocalPlayer then return end
+    
+    local function setup(char)
+        if not char then return end
+        char:WaitForChild("HumanoidRootPart", 5)
+        char:WaitForChild("Humanoid", 5)
+        updatePlayerHighlight(player)
+    end
+    
+    if player.Character then setup(player.Character) end
+    player.CharacterAdded:Connect(setup)
+end
+
+for _, p in pairs(Players:GetPlayers()) do applyHighlight(p) end
+Players.PlayerAdded:Connect(applyHighlight)
+
+local function updateAllWH()
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and p.Character then
+            updatePlayerHighlight(p)
+        end
+    end
+end
+
+-- =================== UI ===================
+local UI = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
+UI.Name = "FlickProUI"
+UI.ResetOnSpawn = false
+
+-- TARGET
+local TargetDisplay = Instance.new("TextLabel", UI)
+TargetDisplay.Size = UDim2.new(0, 140, 0, 30)
+TargetDisplay.Position = UDim2.new(0.01, 0, 0.01, 0)
+TargetDisplay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+TargetDisplay.BackgroundTransparency = 0.6
+TargetDisplay.TextColor3 = Color3.fromRGB(0, 255, 0)
+TargetDisplay.Text = "target " .. Settings.TargetPart
+TargetDisplay.Font = Enum.Font.SourceSansBold
+TargetDisplay.TextSize = 16
+TargetDisplay.TextXAlignment = Enum.TextXAlignment.Left
+
+-- MENU TOGGLE
+local ToggleBtn = Instance.new("TextButton", UI)
+ToggleBtn.Size = UDim2.new(0, 80, 0, 30)
+ToggleBtn.Position = UDim2.new(0.01, 0, 0.065, 0)
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+ToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleBtn.Text = "☰ MENU"
+ToggleBtn.Font = Enum.Font.SourceSansBold
+ToggleBtn.TextSize = 14
+ToggleBtn.Active = true
+ToggleBtn.Draggable = true 
+
+-- FOV CIRCLE
+local FOVFrame = Instance.new("Frame", UI)
+FOVFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+FOVFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+FOVFrame.Size = UDim2.new(0, Settings.FOV * 2, 0, Settings.FOV * 2)
+FOVFrame.BackgroundTransparency = 1
+FOVFrame.Visible = Settings.ShowFOV
+
+local UICorner = Instance.new("UICorner", FOVFrame)
+UICorner.CornerRadius = UDim.new(1, 0)
+
+local UIStroke = Instance.new("UIStroke", FOVFrame)
+UIStroke.Color = Color3.fromRGB(255, 0, 0)
+UIStroke.Thickness = 1.5
+UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+-- =================== MAIN PANEL ===================
+local MainFrame = Instance.new("Frame", UI)
+MainFrame.Size = UDim2.new(0, 220, 0, 420)
+MainFrame.Position = UDim2.new(0.5, -110, 0.5, -210)
+MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+MainFrame.Active = true
+MainFrame.Draggable = true
+MainFrame.Visible = false
+
+ToggleBtn.MouseButton1Click:Connect(function()
+    MainFrame.Visible = not MainFrame.Visible
+end)
+
+-- TARGET BUTTON
+local TargetBtn = Instance.new("TextButton", MainFrame)
+TargetBtn.Size = UDim2.new(0.9, 0, 0, 35)
+TargetBtn.Position = UDim2.new(0.05, 0, 0, 10)
+TargetBtn.Text = "Target: " .. Settings.TargetPart
+TargetBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 150)
+TargetBtn.TextColor3 = Color3.new(1,1,1)
+TargetBtn.Font = Enum.Font.SourceSansBold
+
+TargetBtn.MouseButton1Click:Connect(function()
+    CycleTarget()
+    TargetDisplay.Text = "target " .. Settings.TargetPart
+end)
+
+-- BUTTON BUILDER (Aimbot, WallCheck, Wallhack)
+local function CreateBtn(name, settingKey, posY, customCallback)
+    local btn = Instance.new("TextButton", MainFrame)
+    btn.Size = UDim2.new(0.9, 0, 0, 35)
+    btn.Position = UDim2.new(0.05, 0, 0, posY)
+    btn.Text = name .. ": " .. (Settings[settingKey] and "ON" or "OFF")
+    btn.BackgroundColor3 = Settings[settingKey] and Color3.fromRGB(50, 150, 50) or Color3.fromRGB(150, 50, 50)
+    btn.TextColor3 = Color3.new(1,1,1)
+    btn.Font = Enum.Font.SourceSansBold
+    
+    btn.MouseButton1Click:Connect(function()
+        Settings[settingKey] = not Settings[settingKey]
+        btn.Text = name .. ": " .. (Settings[settingKey] and "ON" or "OFF")
+        btn.BackgroundColor3 = Settings[settingKey] and Color3.fromRGB(50, 150, 50) or Color3.fromRGB(150, 50, 50)
+        if customCallback then customCallback() end
+    end)
+end
+
+CreateBtn("Aimbot", "AimbotEnabled", 55)
+CreateBtn("WallCheck", "VisibleCheck", 100)
+CreateBtn("Wallhack (ESP)", "WallhackEnabled", 145, updateAllWH)
+
+-- =================== FRIENDS BUTTON ===================
+local FriendsBtn = Instance.new("TextButton", MainFrame)
+FriendsBtn.Size = UDim2.new(0.9, 0, 0, 35)
+FriendsBtn.Position = UDim2.new(0.05, 0, 0, 190)
+FriendsBtn.Text = "Friends"
+FriendsBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+FriendsBtn.TextColor3 = Color3.new(1,1,1)
+FriendsBtn.Font = Enum.Font.SourceSansBold
+
+-- =================== FOV BUTTON ===================
+local FOVBtn = Instance.new("TextButton", MainFrame)
+FOVBtn.Size = UDim2.new(0.9, 0, 0, 35)
+FOVBtn.Position = UDim2.new(0.05, 0, 0, 235)
+FOVBtn.Text = "Show FOV: " .. (Settings.ShowFOV and "ON" or "OFF")
+FOVBtn.BackgroundColor3 = Settings.ShowFOV and Color3.fromRGB(50, 150, 50) or Color3.fromRGB(150, 50, 50)
+FOVBtn.TextColor3 = Color3.new(1,1,1)
+FOVBtn.Font = Enum.Font.SourceSansBold
+
+FOVBtn.MouseButton1Click:Connect(function()
+    Settings.ShowFOV = not Settings.ShowFOV
+    FOVBtn.Text = "Show FOV: " .. (Settings.ShowFOV and "ON" or "OFF")
+    FOVBtn.BackgroundColor3 = Settings.ShowFOV and Color3.fromRGB(50, 150, 50) or Color3.fromRGB(150, 50, 50)
+    FOVFrame.Visible = Settings.ShowFOV
+end)
+
+-- TEXTBOX BUILDER (FOV and Smooth)
+local function CreateTextBox(placeholder, defaultVal, posY, callback)
+    local box = Instance.new("TextBox", MainFrame)
+    box.Size = UDim2.new(0.9, 0, 0, 35)
+    box.Position = UDim2.new(0.05, 0, 0, posY)
+    box.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    box.TextColor3 = Color3.new(1,1,1)
+    box.Text = placeholder .. ": " .. tostring(defaultVal)
+    box.Font = Enum.Font.SourceSansBold
+    
+    box.FocusLost:Connect(function()
+        local val = tonumber(box.Text:match("%d+%.?%d*"))
+        if val then
+            callback(val)
+            box.Text = placeholder .. ": " .. tostring(val)
+        else
+            box.Text = placeholder .. ": " .. tostring(defaultVal)
+        end
+    end)
+end
+
+CreateTextBox("FOV Size", Settings.FOV, 280, function(v) 
+    Settings.FOV = v 
+    FOVFrame.Size = UDim2.new(0, v * 2, 0, v * 2)
+end)
+
+CreateTextBox("Smooth (0-1)", Settings.Smoothness, 325, function(v) 
+    Settings.Smoothness = math.clamp(v, 0, 1) 
+end)
+
+-- =================== FRIENDS SUBMENU ===================
+local FriendsFrame = Instance.new("Frame", UI)
+FriendsFrame.Size = UDim2.new(0, 220, 0, 350)
+FriendsFrame.Position = UDim2.new(0.5, -110, 0.5, -175)
+FriendsFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+FriendsFrame.Active = true
+FriendsFrame.Draggable = true
+FriendsFrame.Visible = false
+
+-- Title
+local FriendsTitle = Instance.new("TextLabel", FriendsFrame)
+FriendsTitle.Size = UDim2.new(1, 0, 0, 30)
+FriendsTitle.Position = UDim2.new(0, 0, 0, 5)
+FriendsTitle.BackgroundTransparency = 1
+FriendsTitle.Text = "Friend List"
+FriendsTitle.TextColor3 = Color3.new(1,1,1)
+FriendsTitle.Font = Enum.Font.SourceSansBold
+FriendsTitle.TextSize = 16
+
+-- Input field
+local FriendInput = Instance.new("TextBox", FriendsFrame)
+FriendInput.Size = UDim2.new(0.9, 0, 0, 30)
+FriendInput.Position = UDim2.new(0.05, 0, 0, 40)
+FriendInput.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+FriendInput.TextColor3 = Color3.new(1,1,1)
+FriendInput.PlaceholderText = "Type friend's name"
+FriendInput.Font = Enum.Font.SourceSansBold
+FriendInput.Text = ""
+
+-- Add button
+local AddFriendBtn = Instance.new("TextButton", FriendsFrame)
+AddFriendBtn.Size = UDim2.new(0.4, 0, 0, 30)
+AddFriendBtn.Position = UDim2.new(0.05, 0, 0, 80)
+AddFriendBtn.Text = "Add"
+AddFriendBtn.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
+AddFriendBtn.TextColor3 = Color3.new(1,1,1)
+AddFriendBtn.Font = Enum.Font.SourceSansBold
+
+-- Remove button
+local RemoveFriendBtn = Instance.new("TextButton", FriendsFrame)
+RemoveFriendBtn.Size = UDim2.new(0.4, 0, 0, 30)
+RemoveFriendBtn.Position = UDim2.new(0.55, 0, 0, 80)
+RemoveFriendBtn.Text = "Remove"
+RemoveFriendBtn.BackgroundColor3 = Color3.fromRGB(150, 50, 50)
+RemoveFriendBtn.TextColor3 = Color3.new(1,1,1)
+RemoveFriendBtn.Font = Enum.Font.SourceSansBold
+
+-- Scrollable friend list
+local FriendDisplay = Instance.new("ScrollingFrame", FriendsFrame)
+FriendDisplay.Size = UDim2.new(0.9, 0, 0, 140)
+FriendDisplay.Position = UDim2.new(0.05, 0, 0, 120)
+FriendDisplay.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+FriendDisplay.BorderSizePixel = 0
+FriendDisplay.CanvasSize = UDim2.new(0, 0, 0, 0)
+FriendDisplay.ScrollBarThickness = 4
+
+-- Empty label
+local EmptyLabel = Instance.new("TextLabel", FriendDisplay)
+EmptyLabel.Size = UDim2.new(1, 0, 1, 0)
+EmptyLabel.BackgroundTransparency = 1
+EmptyLabel.Text = "No friends added"
+EmptyLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
+EmptyLabel.Font = Enum.Font.SourceSans
+EmptyLabel.TextSize = 14
+
+-- Back button
+local BackBtn = Instance.new("TextButton", FriendsFrame)
+BackBtn.Size = UDim2.new(0.4, 0, 0, 30)
+BackBtn.Position = UDim2.new(0.3, 0, 0, 270)
+BackBtn.Text = "Back"
+BackBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+BackBtn.TextColor3 = Color3.new(1,1,1)
+BackBtn.Font = Enum.Font.SourceSansBold
+
+-- =================== SUBMENU LOGIC ===================
+local function UpdateFriendDisplay()
+    for _, child in pairs(FriendDisplay:GetChildren()) do
+        if child ~= EmptyLabel then
+            child:Destroy()
+        end
+    end
+
+    if #FriendList == 0 then
+        EmptyLabel.Visible = true
+        FriendDisplay.CanvasSize = UDim2.new(0, 0, 0, 0)
+        return
+    end
+
+    EmptyLabel.Visible = false
+    local yOffset = 0
+    for _, name in pairs(FriendList) do
+        local label = Instance.new("TextLabel", FriendDisplay)
+        label.Size = UDim2.new(1, 0, 0, 25)
+        label.Position = UDim2.new(0, 0, 0, yOffset)
+        label.BackgroundTransparency = 1
+        label.Text = "• " .. name
+        label.TextColor3 = Color3.new(1,1,1)
+        label.TextXAlignment = Enum.TextXAlignment.Left
+        label.Font = Enum.Font.SourceSans
+        label.TextSize = 14
+        yOffset = yOffset + 25
+    end
+    FriendDisplay.CanvasSize = UDim2.new(0, 0, 0, yOffset)
+end
+
+-- Add friend
+AddFriendBtn.MouseButton1Click:Connect(function()
+    local name = FriendInput.Text:gsub("^%s*(.-)%s*$", "%1")
+    if name == "" then return end
+    
+    local player = Players:FindFirstChild(name)
+    if not player then
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "Friend System",
+            Text = "Player not found!",
+            Duration = 2
+        })
+        return
+    end
+    
+    for _, v in pairs(FriendList) do
+        if v == name then return end
+    end
+    table.insert(FriendList, name)
+    FriendInput.Text = ""
+    UpdateFriendDisplay()
+    
+    -- Update ESP for this friend
+    if player then
+        updatePlayerHighlight(player)
+    end
+end)
+
+-- Remove friend
+RemoveFriendBtn.MouseButton1Click:Connect(function()
+    local name = FriendInput.Text:gsub("^%s*(.-)%s*$", "%1")
+    if name == "" then return end
+    for i, v in pairs(FriendList) do
+        if v == name then
+            table.remove(FriendList, i)
+            FriendInput.Text = ""
+            UpdateFriendDisplay()
+            
+            -- Update ESP for this ex-friend (back to red)
+            local player = Players:FindFirstChild(name)
+            if player then
+                updatePlayerHighlight(player)
+            end
+            return
+        end
+    end
+    
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Friend System",
+        Text = "Friend not found in list!",
+        Duration = 2
+    })
+end)
+
+-- Toggle friend submenu
+FriendsBtn.MouseButton1Click:Connect(function()
+    FriendsFrame.Visible = not FriendsFrame.Visible
+    if FriendsFrame.Visible then
+        UpdateFriendDisplay()
+    end
+end)
+
+-- Back button closes submenu
+BackBtn.MouseButton1Click:Connect(function()
+    FriendsFrame.Visible = false
+end)
+
+-- =================== HOTKEYS ===================
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    
+    -- T key: toggle Head/Torso
+    if input.KeyCode == Enum.KeyCode.T then
+        CycleTarget()
+        TargetDisplay.Text = "target " .. Settings.TargetPart
+        if TargetBtn then
+            TargetBtn.Text = "Target: " .. Settings.TargetPart
+        end
+    end
+    
+    -- F key: toggle FOV circle visibility
+    if input.KeyCode == Enum.KeyCode.F then
+        Settings.ShowFOV = not Settings.ShowFOV
+        FOVFrame.Visible = Settings.ShowFOV
+        if FOVBtn then
+            FOVBtn.Text = "Show FOV: " .. (Settings.ShowFOV and "ON" or "OFF")
+            FOVBtn.BackgroundColor3 = Settings.ShowFOV and Color3.fromRGB(50, 150, 50) or Color3.fromRGB(150, 50, 50)
+        end
+        print("FOV Circle: " .. (Settings.ShowFOV and "VISIBLE" or "HIDDEN"))
+    end
+end)
+
+-- =================== MAIN LOOP ===================
+RunService.RenderStepped:Connect(function()
+    if Settings.AimbotEnabled then
+        local target = getClosestPlayer()
+        if target and target.Character then
+            local targetPart = target.Character:FindFirstChild(Settings.TargetPart)
+            if not targetPart then
+                targetPart = target.Character:FindFirstChild("HumanoidRootPart")
+            end
+            if targetPart then
+                local targetPos = targetPart.Position
+                local targetCFrame = CFrame.new(Camera.CFrame.Position, targetPos)
+                Camera.CFrame = Camera.CFrame:Lerp(targetCFrame, 1 - Settings.Smoothness)
+            end
+        end
+    end
+end)
