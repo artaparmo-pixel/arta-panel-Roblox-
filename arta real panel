@@ -42,7 +42,8 @@ local HackNames = {
     "panel Ss",
     "ریل",
     "اهنگ بعضی از بازی ها کار میده",
-    "بتولز کنترل پارت سروساید"
+    "بتولز کنترل پارت سروساید",
+    "ایم بات(جز زیوالز)"
 }
 
 local HackLinks = {
@@ -68,14 +69,15 @@ local HackLinks = {
     "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/panel%20ss",
     "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/coolhace",
     "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/sang",
-    "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/btools%20contorol%20part"
+    "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/btools%20contorol%20part",
+    "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/aim%20bot"
 }
 
 local SkyCommands = {
     {Name = "اهنگ", Cmd = {";music 133732492604303", ";volume 10"}},
-    {Name = "دکل", Cmd = {";skybox 91804512111491"}},
+{Name = "دکل", Cmd = {";skybox 91804512111491"}},
     {Name = "سیگار", Cmd = {";script require(122168186720709).roko(\"Arta139296\")"}},
-{Name = "بمب اتم", Cmd = {";script require(4867426485):SD2(\"Arta139296\")"}},
+    {Name = "بمب اتم", Cmd = {";script require(4867426485):SD2(\"Arta139296\")"}},
     {Name = "اهنگ ۲", Cmd = {";music 6129291390", ";volume 10"}},
     {Name = "اهنگ ۳", Cmd = {";music 85390427326662", ";volume 10", ";pitch 0.10"}},
     {Name = "آهنگ ۴", Cmd = {";music 1839246711", ";volume 10"}},
