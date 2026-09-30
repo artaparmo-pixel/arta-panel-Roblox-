@@ -1,0 +1,475 @@
+-- ==============================================
+-- ===== پنل لینک زدن اسکریپت (اصلاح شده) =====
+-- ==============================================
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local HttpService = game:GetService("HttpService")
+local CoreGui = game:GetService("CoreGui")
+local TweenService = game:GetService("TweenService")
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "LinkPanel"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = CoreGui
+
+-- ===== فریم اصلی =====
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 400, 0, 440)
+MainFrame.Position = UDim2.new(0.5, -200, 0.5, -220)
+MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+MainFrame.BackgroundTransparency = 1
+MainFrame.BorderSizePixel = 0
+MainFrame.Active = true
+MainFrame.ClipsDescendants = true
+MainFrame.Parent = ScreenGui
+
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 14)
+MainCorner.Parent = MainFrame
+
+-- ===== عکس پس زمینه =====
+local Wallpaper = Instance.new("ImageLabel")
+Wallpaper.Size = UDim2.new(1, 0, 1, 0)
+Wallpaper.Position = UDim2.new(0, 0, 0, 0)
+Wallpaper.BackgroundTransparency = 1
+Wallpaper.Image = "rbxassetid://94436187842563"
+Wallpaper.ScaleType = Enum.ScaleType.Crop
+Wallpaper.ZIndex = 0
+Wallpaper.Parent = MainFrame
+
+local WallCorner = Instance.new("UICorner")
+WallCorner.CornerRadius = UDim.new(0, 14)
+WallCorner.Parent = Wallpaper
+
+-- لایه گرادینت
+local GradientOverlay = Instance.new("Frame")
+GradientOverlay.Size = UDim2.new(1, 0, 1, 0)
+GradientOverlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+GradientOverlay.BackgroundTransparency = 0.6
+GradientOverlay.BorderSizePixel = 0
+GradientOverlay.ZIndex = 1
+GradientOverlay.Parent = MainFrame
+
+local GradientCorner = Instance.new("UICorner")
+GradientCorner.CornerRadius = UDim.new(0, 14)
+GradientCorner.Parent = GradientOverlay
+
+local Gradient = Instance.new("UIGradient")
+Gradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 0, 0)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(50, 0, 100))
+})
+Gradient.Transparency = NumberSequence.new({
+    NumberSequenceKeypoint.new(0, 0.4),
+    NumberSequenceKeypoint.new(1, 0.85)
+})
+Gradient.Rotation = 45
+Gradient.Parent = GradientOverlay
+
+-- ===== نوار عنوان (TextButton برای کشیدن) =====
+local TitleBar = Instance.new("TextButton")
+TitleBar.Size = UDim2.new(1, 0, 0, 45)
+TitleBar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+TitleBar.BackgroundTransparency = 0.85
+TitleBar.BorderSizePixel = 0
+TitleBar.Text = ""
+TitleBar.AutoButtonColor = false
+TitleBar.ZIndex = 2
+TitleBar.Parent = MainFrame
+
+local TitleBarCorner = Instance.new("UICorner")
+TitleBarCorner.CornerRadius = UDim.new(0, 14)
+TitleBarCorner.Parent = TitleBar
+
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, -50, 1, 0)
+Title.Position = UDim2.new(0, 15, 0, 0)
+Title.Text = "🔗 پنل لینک زدن اسکریپت"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.BackgroundTransparency = 1
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 16
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.ZIndex = 3
+Title.Parent = TitleBar
+
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Size = UDim2.new(0, 30, 0, 30)
+CloseBtn.Position = UDim2.new(1, -38, 0, 7)
+CloseBtn.Text = "✕"
+CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
+CloseBtn.BackgroundTransparency = 0.3
+CloseBtn.BorderSizePixel = 0
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.TextSize = 16
+CloseBtn.ZIndex = 3
+CloseBtn.Parent = TitleBar
+
+local CloseCorner = Instance.new("UICorner")
+CloseCorner.CornerRadius = UDim.new(0, 8)
+CloseCorner.Parent = CloseBtn
+
+-- ===== محتوا =====
+local ContentFrame = Instance.new("Frame")
+ContentFrame.Size = UDim2.new(1, -30, 1, -65)
+ContentFrame.Position = UDim2.new(0, 15, 0, 55)
+ContentFrame.BackgroundTransparency = 1
+ContentFrame.ZIndex = 2
+ContentFrame.Parent = MainFrame
+local LinkLabel = Instance.new("TextLabel")
+LinkLabel.Size = UDim2.new(1, 0, 0, 25)
+LinkLabel.Position = UDim2.new(0, 0, 0, 0)
+LinkLabel.Text = "لینک اسکریپت رو وارد کن:"
+LinkLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+LinkLabel.BackgroundTransparency = 1
+LinkLabel.Font = Enum.Font.GothamBold
+LinkLabel.TextSize = 15
+LinkLabel.TextXAlignment = Enum.TextXAlignment.Right
+LinkLabel.ZIndex = 3
+LinkLabel.Parent = ContentFrame
+
+-- باکس لینک
+local LinkBox = Instance.new("TextBox")
+LinkBox.Size = UDim2.new(1, 0, 0, 42)
+LinkBox.Position = UDim2.new(0, 0, 0, 32)
+LinkBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+LinkBox.BackgroundTransparency = 0.75
+LinkBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+LinkBox.PlaceholderText = "https://raw.githubusercontent.com/..."
+LinkBox.PlaceholderColor3 = Color3.fromRGB(180, 180, 180)
+LinkBox.Text = ""
+LinkBox.Font = Enum.Font.Gotham
+LinkBox.TextSize = 12
+LinkBox.BorderSizePixel = 0
+LinkBox.ClearTextOnFocus = false
+LinkBox.TextXAlignment = Enum.TextXAlignment.Left
+LinkBox.ZIndex = 3
+LinkBox.Parent = ContentFrame
+
+local LinkBoxCorner = Instance.new("UICorner")
+LinkBoxCorner.CornerRadius = UDim.new(0, 8)
+LinkBoxCorner.Parent = LinkBox
+
+local LinkStroke = Instance.new("UIStroke")
+LinkStroke.Color = Color3.fromRGB(255, 255, 255)
+LinkStroke.Transparency = 0.7
+LinkStroke.Thickness = 1
+LinkStroke.Parent = LinkBox
+
+-- ===== دکمه تایید =====
+local ConfirmBtn = Instance.new("TextButton")
+ConfirmBtn.Size = UDim2.new(1, 0, 0, 48)
+ConfirmBtn.Position = UDim2.new(0, 0, 0, 90)
+ConfirmBtn.Text = "▶️ تایید و اجرا"
+ConfirmBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ConfirmBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 200)
+ConfirmBtn.BackgroundTransparency = 0.15
+ConfirmBtn.BorderSizePixel = 0
+ConfirmBtn.Font = Enum.Font.GothamBold
+ConfirmBtn.TextSize = 16
+ConfirmBtn.ZIndex = 3
+ConfirmBtn.Parent = ContentFrame
+
+local ConfirmCorner = Instance.new("UICorner")
+ConfirmCorner.CornerRadius = UDim.new(0, 8)
+ConfirmCorner.Parent = ConfirmBtn
+
+local ConfirmGradient = Instance.new("UIGradient")
+ConfirmGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 200, 255)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(100, 0, 200))
+})
+ConfirmGradient.Rotation = 90
+ConfirmGradient.Parent = ConfirmBtn
+
+local ConfirmStroke = Instance.new("UIStroke")
+ConfirmStroke.Color = Color3.fromRGB(255, 255, 255)
+ConfirmStroke.Transparency = 0.6
+ConfirmStroke.Thickness = 1
+ConfirmStroke.Parent = ConfirmBtn
+
+-- ===== نوار وضعیت =====
+local StatusFrame = Instance.new("Frame")
+StatusFrame.Size = UDim2.new(1, 0, 0, 65)
+StatusFrame.Position = UDim2.new(0, 0, 0, 152)
+StatusFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+StatusFrame.BackgroundTransparency = 0.85
+StatusFrame.BorderSizePixel = 0
+StatusFrame.ZIndex = 3
+StatusFrame.Parent = ContentFrame
+
+local StatusCorner = Instance.new("UICorner")
+StatusCorner.CornerRadius = UDim.new(0, 10)
+StatusCorner.Parent = StatusFrame
+
+local StatusStroke = Instance.new("UIStroke")
+StatusStroke.Color = Color3.fromRGB(255, 255, 255)
+StatusStroke.Transparency = 0.7
+StatusStroke.Thickness = 1
+StatusStroke.Parent = StatusFrame
+
+local StatusIcon = Instance.new("TextLabel")
+StatusIcon.Size = UDim2.new(0, 45, 0, 45)
+StatusIcon.Position = UDim2.new(0, 10, 0, 10)
+StatusIcon.Text = "⏳"
+StatusIcon.TextColor3 = Color3.fromRGB(255, 200, 50)
+StatusIcon.BackgroundTransparency = 1
+StatusIcon.Font = Enum.Font.GothamBold
+StatusIcon.TextSize = 32
+StatusIcon.ZIndex = 4
+StatusIcon.Parent = StatusFrame
+
+local StatusText = Instance.new("TextLabel")
+StatusText.Size = UDim2.new(1, -65, 1, 0)
+StatusText.Position = UDim2.new(0, 60, 0, 0)
+StatusText.Text = "آماده"
+StatusText.TextColor3 = Color3.fromRGB(255, 255, 255)
+StatusText.BackgroundTransparency = 1
+StatusText.Font = Enum.Font.GothamBold
+StatusText.TextSize = 12
+StatusText.TextWrapped = true
+StatusText.TextXAlignment = Enum.TextXAlignment.Left
+StatusText.ZIndex = 4
+StatusText.Parent = StatusFrame
+-- ===== لودینگ =====
+local LoadingFrame = Instance.new("Frame")
+LoadingFrame.Size = UDim2.new(1, 0, 0, 90)
+LoadingFrame.Position = UDim2.new(0, 0, 0, 225)
+LoadingFrame.BackgroundTransparency = 1
+LoadingFrame.ZIndex = 3
+LoadingFrame.Visible = false
+LoadingFrame.Parent = ContentFrame
+
+local Spinner = Instance.new("ImageLabel")
+Spinner.Size = UDim2.new(0, 50, 0, 50)
+Spinner.Position = UDim2.new(0.5, -25, 0, 5)
+Spinner.BackgroundTransparency = 1
+Spinner.Image = "rbxassetid://4965945816"
+Spinner.ImageColor3 = Color3.fromRGB(0, 200, 255)
+Spinner.ZIndex = 4
+Spinner.Parent = LoadingFrame
+
+spawn(function()
+    while LoadingFrame.Parent do
+        Spinner.Rotation = Spinner.Rotation + 5
+        wait(0.03)
+    end
+end)
+
+local LoadingText = Instance.new("TextLabel")
+LoadingText.Size = UDim2.new(1, 0, 0, 20)
+LoadingText.Position = UDim2.new(0, 0, 0, 60)
+LoadingText.Text = "در حال دریافت..."
+LoadingText.TextColor3 = Color3.fromRGB(255, 255, 255)
+LoadingText.BackgroundTransparency = 1
+LoadingText.Font = Enum.Font.GothamBold
+LoadingText.TextSize = 13
+LoadingText.ZIndex = 4
+LoadingText.Parent = LoadingFrame
+
+-- راهنما
+local HelpText = Instance.new("TextLabel")
+HelpText.Size = UDim2.new(1, 0, 0, 80)
+HelpText.Position = UDim2.new(0, 0, 0, 320)
+HelpText.Text = "💡 نکات:\n• لینک باید مستقیم به فایل Lua باشه\n• اسکریپت قبلی خودکار پاک میشه"
+HelpText.TextColor3 = Color3.fromRGB(220, 220, 220)
+HelpText.BackgroundTransparency = 1
+HelpText.Font = Enum.Font.Gotham
+HelpText.TextSize = 11
+HelpText.TextWrapped = true
+HelpText.TextYAlignment = Enum.TextYAlignment.Top
+HelpText.TextXAlignment = Enum.TextXAlignment.Right
+HelpText.ZIndex = 3
+HelpText.Parent = ContentFrame
+
+-- ===== توابع =====
+local function FetchScript(link)
+    local ok, res = pcall(function()
+        if syn and syn.request then
+            return syn.request({ Url = link, Method = "GET" }).Body
+        elseif http_request then
+            return http_request({ Url = link, Method = "GET" }).Body
+        elseif request then
+            return request({ Url = link, Method = "GET" }).Body
+        else
+            return HttpService:GetAsync(link)
+        end
+    end)
+    return ok, res
+end
+
+local function SetStatus(icon, text, color)
+    StatusIcon.Text = icon
+    StatusText.Text = text
+    StatusText.TextColor3 = color or Color3.fromRGB(255, 255, 255)
+end
+
+local function ShowLoading(show)
+    LoadingFrame.Visible = show
+    if show then Spinner.Rotation = 0 end
+end
+
+local PreviousScripts = {}
+
+local function CleanPreviousScripts()
+    for _, gui in ipairs(PreviousScripts) do
+        pcall(function()
+            if gui and gui.Parent then
+                gui:Destroy()
+            end
+        end)
+    end
+    PreviousScripts = {}
+end
+
+-- ===== دکمه تایید =====
+ConfirmBtn.MouseButton1Click:Connect(function()
+    local link = LinkBox.Text
+    
+    if link == "" or link == nil then
+        SetStatus("⚠️", "لطفاً لینک رو وارد کن!", Color3.fromRGB(255, 200, 50))
+        return
+    end
+    
+    if not string.find(link, "http") then
+        SetStatus("⚠️", "لینک نامعتبره!", Color3.fromRGB(255, 200, 50))
+        return
+    end
+    
+    SetStatus("🧹", "پاک کردن اسکریپت قبلی...", Color3.fromRGB(255, 200, 50))
+    CleanPreviousScripts()
+    wait(0.3)
+    
+    ShowLoading(true)
+    SetStatus("⏳", "در حال دریافت اسکریپت...", Color3.fromRGB(255, 200, 50))
+    ConfirmBtn.Text = "⏳ در حال اجرا..."
+    ConfirmBtn.Active = false
+    
+    spawn(function()
+        local ok, res = FetchScript(link)
+        local icon = "❌"
+        local message = ""
+        local color = Color3.fromRGB(255, 80, 80)
+        
+        print("===== دیباگ =====")
+        print("لینک:", link)
+        print("Fetch موفق؟", ok, "طول:", ok and res and #res or 0)
+        
+        if ok and res and #res > 0 then
+            SetStatus("📥", "دریافت شد، در حال اجرا...", Color3.fromRGB(100, 200, 255))
+LoadingText.Text = "در حال اجرا..."
+            wait(0.3)
+            
+            local beforeGUIs = {}
+            for _, gui in ipairs(CoreGui:GetChildren()) do
+                beforeGUIs[gui] = true
+            end
+            
+            local execOk, execErr = pcall(function() loadstring(res)() end)
+            
+            print("اجرا موفق؟", execOk)
+            if not execOk then
+                print("خطا:", tostring(execErr))
+            end
+            print("================")
+            
+            if execOk then
+                icon = "✅"
+                message = "اسکریپت با موفقیت اجرا شد!"
+                color = Color3.fromRGB(80, 255, 80)
+                ConfirmBtn.Text = "✅ اجرا شد"
+                
+                wait(0.5)
+                for _, gui in ipairs(CoreGui:GetChildren()) do
+                    if not beforeGUIs[gui] and gui:IsA("ScreenGui") then
+                        if gui.Name ~= "Panel" and gui.Name ~= "LinkPanel" then
+                            table.insert(PreviousScripts, gui)
+                        end
+                    end
+                end
+            else
+                icon = "❌"
+                message = "خطا: " .. tostring(execErr):sub(1, 50)
+                ConfirmBtn.Text = "❌ خطا در اجرا"
+            end
+        else
+            icon = "❌"
+            message = "خطا در دریافت لینک!"
+            ConfirmBtn.Text = "❌ خطا در دریافت"
+        end
+        
+        ShowLoading(false)
+        SetStatus(icon, message, color)
+        
+        wait(5)
+        ConfirmBtn.Text = "▶️ تایید و اجرا"
+        ConfirmBtn.Active = true
+    end)
+end)
+
+-- ===== بستن =====
+CloseBtn.MouseButton1Click:Connect(function()
+    CleanPreviousScripts()
+    ScreenGui:Destroy()
+end)
+
+-- ==========================================
+-- ===== کشیدن پنل (اصلاح شده برای PC + موبایل) =====
+-- ==========================================
+local dragging = false
+local dragStart = nil
+local startPos = nil
+
+-- برای PC
+TitleBar.MouseButton1Down:Connect(function()
+    dragging = true
+    dragStart = UserInputService:GetMouseLocation()
+    startPos = MainFrame.Position
+end)
+
+TitleBar.MouseButton1Up:Connect(function()
+    dragging = false
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local currentPos = UserInputService:GetMouseLocation()
+        local delta = currentPos - dragStart
+        MainFrame.Position = UDim2.new(
+            startPos.X.Scale,
+            startPos.X.Offset + delta.X,
+            startPos.Y.Scale,
+            startPos.Y.Offset + delta.Y
+        )
+    end
+end)
+
+-- برای موبایل (Touch)
+TitleBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = MainFrame.Position
+    end
+end)
+
+TitleBar.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch then
+        dragging = false
+    end
+end)
+
+UserInputService.TouchMoved:Connect(function(input)
+    if dragging then
+        local delta = input.Position - dragStart
+        MainFrame.Position = UDim2.new(
+            startPos.X.Scale,
+            startPos.X.Offset + delta.X,
+            startPos.Y.Scale,
+            startPos.Y.Offset + delta.Y
+        )
+    end
+end)
+
+print("===== پنل لینک زدن اسکریپت آماده شد! =====")
