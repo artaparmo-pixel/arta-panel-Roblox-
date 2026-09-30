@@ -39,11 +39,13 @@ local HackNames = {
     "فحش بدون سانسور",
     "پرچم نازی",
     "sky box f3x",
-    "panel Ss",
     "ریل",
     "اهنگ بعضی از بازی ها کار میده",
     "بتولز کنترل پارت سروساید",
-    "ایم بات(جز زیوالز)"
+    "ایم بات(جز زیوالز)",
+    "tea tower",
+    "کپی گیم(pc)",
+    "wal hop"
 }
 
 local HackLinks = {
@@ -66,16 +68,16 @@ local HackLinks = {
     "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/scrpit",
     "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/nazi%20scrpit",
     "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/sky%20arta",
-    "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/panel%20ss",
     "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/coolhace",
     "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/sang",
     "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/btools%20contorol%20part",
-    "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/aim%20bot"
-}
-
-local SkyCommands = {
+    "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/aim%20bot",
+    "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/scan%20tea%20tower",
+    "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/cope%20game",
+    "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/wall%20hob"
+}local SkyCommands = {
     {Name = "اهنگ", Cmd = {";music 133732492604303", ";volume 10"}},
-{Name = "دکل", Cmd = {";skybox 91804512111491"}},
+    {Name = "دکل", Cmd = {";skybox 91804512111491"}},
     {Name = "سیگار", Cmd = {";script require(122168186720709).roko(\"Arta139296\")"}},
     {Name = "بمب اتم", Cmd = {";script require(4867426485):SD2(\"Arta139296\")"}},
     {Name = "اهنگ ۲", Cmd = {";music 6129291390", ";volume 10"}},
@@ -189,6 +191,7 @@ LoginBtn.BorderSizePixel = 0
 LoginBtn.Font = Enum.Font.SourceSansBold
 LoginBtn.TextSize = 16
 LoginBtn.Parent = LoginFrame
+
 local LoginError = Instance.new("TextLabel")
 LoginError.Size = UDim2.new(0.8, 0, 0, 20)
 LoginError.Position = UDim2.new(0.1, 0, 0.55, 0)
@@ -278,7 +281,7 @@ TabFrame.Parent = MainFrame
 local Tab1 = Instance.new("TextButton")
 Tab1.Size = UDim2.new(0.5, -1, 1, 0)
 Tab1.Position = UDim2.new(0, 0, 0, 0)
-Tab1.Text = "اسکرپیت هک"
+Tab1.Text = "اسکریپت هک"
 Tab1.TextColor3 = Color3.fromRGB(255, 255, 255)
 Tab1.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
 Tab1.BorderSizePixel = 0
@@ -296,7 +299,6 @@ Tab2.BorderSizePixel = 0
 Tab2.Font = Enum.Font.SourceSansBold
 Tab2.TextSize = 16
 Tab2.Parent = TabFrame
-
 local HackContent = Instance.new("ScrollingFrame")
 HackContent.Size = UDim2.new(1, -10, 0, 395)
 HackContent.Position = UDim2.new(0, 5, 0, 75)
@@ -306,6 +308,7 @@ HackContent.ScrollBarThickness = 6
 HackContent.CanvasSize = UDim2.new(0, 0, 0, 0)
 HackContent.ScrollingDirection = Enum.ScrollingDirection.Y
 HackContent.Parent = MainFrame
+
 local SkyContent = Instance.new("ScrollingFrame")
 SkyContent.Size = UDim2.new(1, -10, 0, 395)
 SkyContent.Position = UDim2.new(0, 5, 0, 75)
@@ -405,7 +408,7 @@ local function MakeSkyBtns()
         btn.MouseButton1Click:Connect(function()
             btn.Text = "..."
             btn.BackgroundColor3 = Color3.fromRGB(200, 150, 50)
-            spawn(function()
+spawn(function()
                 for _, cmd in ipairs(SkyCommands[i].Cmd) do
                     SendChat(cmd)
                     wait(0.3)
@@ -425,6 +428,7 @@ end
 
 MakeHackBtns()
 MakeSkyBtns()
+
 local function SwitchTab(tab)
     if tab == 1 then
         Tab1.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
