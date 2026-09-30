@@ -1,0 +1,597 @@
+-- ==============================================
+-- ===== پنل حرفه‌ای نسخه ۲.۰ (بدون خطا) =====
+-- ==============================================
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+local CoreGui = game:GetService("CoreGui")
+local SS = game:GetService("SoundService")
+local RS = game:GetService("ReplicatedStorage")
+local HTTP = game:GetService("HttpService")
+local Tween = game:GetService("TweenService")
+local LP = Players.LocalPlayer
+
+HTTP.HttpEnabled = true
+local Password = "artapanel1234"
+local MusicId = 133732492604303
+local MusicSound, isMusicLoop, loopConn = nil, false, nil
+local Lang = "fa"
+
+-- ===== ترجمه‌ها =====
+local T = {
+    fa = {
+        welcome="به آپدیت ۲.۰ خوش آمدید",
+        sorry="بابت تاخیر عذر می‌خواهیم",
+        selectLang="زبان خود را انتخاب کنید",
+        enterPass="رمز پنل را وارد کنید",
+        passPh="رمز را وارد کنید...",
+        confirm="تایید",
+        wrong="❌ رمز اشتباه!",
+        title="پنل اسکریپت‌ها",
+        tab1="اسکریپت هک",
+        tab2="دکال و آهنگ",
+        tab3="لینک اسکریپت",
+        play="🎵 پلی",
+        stop="⏹️ استاپ",
+        loading="در حال آماده‌سازی...",
+        linkLbl="لینک اسکریپت رو وارد کن:",
+        runBtn="▶️ اجرای اسکریپت",
+        searchPh="جستجوی اسکریپت..."
+    },
+    en = {
+        welcome="Welcome to Update 2.0",
+        sorry="Sorry for the delay",
+        selectLang="Select Your Language",
+        enterPass="Enter Panel Password",
+        passPh="Enter password...",
+        confirm="Confirm",
+        wrong="❌ Wrong Password!",
+        title="Scripts Panel",
+        tab1="Hack Scripts",
+        tab2="Decal & Music",
+        tab3="Script Link",
+        play="🎵 Play",
+        stop="⏹️ Stop",
+        loading="Loading...",
+        linkLbl="Enter script link:",
+        runBtn="▶️ Run Script",
+        searchPh="Search scripts..."
+    }
+}
+
+-- ===== داده‌ها =====
+local Hacks = {
+    {"پک دنس","Dance Pack","https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/dance%20arta%20panel"},
+    {"F3X Crab","F3X Crab","https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/f3x%20crab"},
+    {"کنترل نوب با F3X","Control Noob F3X","https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/nps%20noob"},
+    {"۹۹ نایت","99 Nights","https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/99%20nihte"},
+    {"بکدور ۱","Backdoor 1","https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/bacdor%201"},
+    {"بکدور ۲","Backdoor 2","https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/bacdor%202"},
+    {"بنگ","Bang","https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/bang"},
+    {"بروکهاون","Brookhaven","https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/brokhaven"},
+    {"بن همر","Ban Hammer","https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/f3x%20ban%20hammer"},
+    {"فیلینگ","Feeling","https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/filing"},
+    {"هک ادمین پنل","Admin Panel","https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/hack%20admin%20panel"},
+    {"F3X توپ پنل","F3X Ball","https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/orbit%20panel%20f3x"},
+    {"پرو کیک پنل","Pro Kick","https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/pro%20kick%20panel"},
+    {"SCP R6","SCP R6","https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/scp"},
+    {"کوچیک کردن وسیله","Shrink Item","https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/smal"},
+{"کشتن همه با شمشیر","Kill All Sword","https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/sword%20kill%20all"},
+    {"فحش بدون سانسور","Uncensored Curse","https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/scrpit"},
+    {"پرچم نازی","Nazi Flag","https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/nazi%20scrpit"},
+    {"sky box f3x","Sky Box F3X","https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/sky%20arta"},
+    {"ریل","Rail","https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/coolhace"},
+    {"اهنگ بعضی از بازی ها","Music Some","https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/sang"},
+    {"بتولز کنترل پارت","Btools","https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/btools%20contorol%20part"},
+    {"ایم بات","Aim Bot","https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/aim%20bot"},
+    {"tea tower","Tea Tower","https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/scan%20tea%20tower"},
+    {"کپی گیم(pc)","Copy Game","https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/cope%20game"},
+    {"wal hop","Wall Hop","https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/wall%20hob"}
+}
+
+local SkyCmds = {
+    {"اهنگ","Music",{";music 133732492604303",";volume 10"}},
+    {"دکل","Skybox",{";skybox 91804512111491"}},
+    {"سیگار","Cigarette",{";script require(122168186720709).roko(\"Arta139296\")"}},
+    {"بمب اتم","Atomic Bomb",{";script require(4867426485):SD2(\"Arta139296\")"}},
+    {"اهنگ ۲","Music 2",{";music 6129291390",";volume 10"}},
+    {"اهنگ ۳","Music 3",{";music 85390427326662",";volume 10",";pitch 0.10"}},
+    {"آهنگ ۴","Music 4",{";music 1839246711",";volume 10"}},
+    {"استوپ اهنگ","Stop Music",{";stop"}}
+}
+
+-- ===== توابع =====
+local function PlayMusic()
+    pcall(function()
+        if MusicSound then MusicSound:Stop() MusicSound:Destroy() end
+        if loopConn then loopConn:Disconnect() end
+        MusicSound = Instance.new("Sound")
+        MusicSound.SoundId = "rbxassetid://"..MusicId
+        MusicSound.Volume = 1
+        MusicSound.Parent = SS
+        MusicSound:Play()
+        isMusicLoop = true
+        loopConn = MusicSound.Ended:Connect(function()
+            if isMusicLoop then PlayMusic() end
+        end)
+    end)
+end
+
+local function StopMusic()
+    pcall(function()
+        isMusicLoop = false
+        if loopConn then loopConn:Disconnect() end
+        if MusicSound then MusicSound:Stop() MusicSound:Destroy() end
+    end)
+end
+
+local function SendChat(msg)
+    pcall(function()
+        local chat = RS:FindFirstChild("DefaultChatSystemChatEvents")
+        if chat and chat:FindFirstChild("SayMessageRequest") then
+            chat.SayMessageRequest:FireServer(msg, "All")
+        end
+    end)
+    pcall(function()
+        local TCS = game:GetService("TextChatService")
+        if TCS.ChatVersion == Enum.ChatVersion.TextChatService then
+            local ch = TCS.TextChannels.RBXGeneral
+            if ch then ch:SendAsync(msg) end
+        end
+    end)
+end
+
+local function FetchScript(link)
+    local ok, res = pcall(function()
+        if syn and syn.request then
+            return syn.request({Url=link,Method="GET"}).Body
+        elseif http_request then
+            return http_request({Url=link,Method="GET"}).Body
+        elseif request then
+            return request({Url=link,Method="GET"}).Body
+        else
+            return HTTP:GetAsync(link)
+        end
+    end)
+    return ok, res
+end
+
+-- ===== GUI =====
+local SG = Instance.new("ScreenGui")
+SG.Name = "Panel"
+SG.ResetOnSpawn = false
+SG.IgnoreGuiInset = true
+SG.Parent = CoreGui
+-- ===== صفحه ۱: زبان =====
+local LangF = Instance.new("Frame")
+LangF.Size = UDim2.new(0,480,0,340)
+LangF.Position = UDim2.new(0.5,0,0.5,0)
+LangF.AnchorPoint = Vector2.new(0.5,0.5)
+LangF.BackgroundColor3 = Color3.fromRGB(15,15,25)
+LangF.BorderSizePixel = 0
+LangF.Parent = SG
+
+local LangC = Instance.new("UICorner")
+LangC.CornerRadius = UDim.new(0,18)
+LangC.Parent = LangF
+
+local LangBG = Instance.new("Frame")
+LangBG.Size = UDim2.new(1,0,1,0)
+LangBG.BackgroundColor3 = Color3.fromRGB(20,20,35)
+LangBG.BorderSizePixel = 0
+LangBG.ZIndex = 0
+LangBG.Parent = LangF
+
+local LangBGC = Instance.new("UICorner")
+LangBGC.CornerRadius = UDim.new(0,18)
+LangBGC.Parent = LangBG
+
+local LangGrad = Instance.new("UIGradient")
+LangGrad.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(20,20,40)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(40,20,60)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(20,30,50))
+})
+LangGrad.Rotation = 45
+LangGrad.Parent = LangBG
+
+local Logo = Instance.new("TextLabel")
+Logo.Size = UDim2.new(1,0,0,60)
+Logo.Position = UDim2.new(0,0,0,25)
+Logo.Text = "🎮"
+Logo.TextColor3 = Color3.fromRGB(0,200,255)
+Logo.BackgroundTransparency = 1
+Logo.TextSize = 50
+Logo.ZIndex = 3
+Logo.Parent = LangF
+
+local LangTitle = Instance.new("TextLabel")
+LangTitle.Size = UDim2.new(1,-20,0,35)
+LangTitle.Position = UDim2.new(0,10,0,85)
+LangTitle.Text = "زبان خود را انتخاب کنید"
+LangTitle.TextColor3 = Color3.fromRGB(255,255,255)
+LangTitle.BackgroundTransparency = 1
+LangTitle.Font = Enum.Font.SourceSansBold
+LangTitle.TextSize = 22
+LangTitle.ZIndex = 3
+LangTitle.Parent = LangF
+
+local LangSub = Instance.new("TextLabel")
+LangSub.Size = UDim2.new(1,-20,0,25)
+LangSub.Position = UDim2.new(0,10,0,120)
+LangSub.Text = "Select Your Language"
+LangSub.TextColor3 = Color3.fromRGB(180,180,200)
+LangSub.BackgroundTransparency = 1
+LangSub.Font = Enum.Font.SourceSans
+LangSub.TextSize = 14
+LangSub.ZIndex = 3
+LangSub.Parent = LangF
+
+local FaB = Instance.new("TextButton")
+FaB.Size = UDim2.new(0.4,-10,0,75)
+FaB.Position = UDim2.new(0.06,0,0.5,0)
+FaB.Text = "🇮🇷 فارسی"
+FaB.TextColor3 = Color3.fromRGB(255,255,255)
+FaB.BackgroundColor3 = Color3.fromRGB(0,170,100)
+FaB.BorderSizePixel = 0
+FaB.Font = Enum.Font.SourceSansBold
+FaB.TextSize = 22
+FaB.ZIndex = 3
+FaB.Parent = LangF
+
+local FaC = Instance.new("UICorner")
+FaC.CornerRadius = UDim.new(0,14)
+FaC.Parent = FaB
+
+local EnB = Instance.new("TextButton")
+EnB.Size = UDim2.new(0.4,-10,0,75)
+EnB.Position = UDim2.new(0.54,0,0.5,0)
+EnB.Text = "🇬🇧 English"
+EnB.TextColor3 = Color3.fromRGB(255,255,255)
+EnB.BackgroundColor3 = Color3.fromRGB(0,120,220)
+EnB.BorderSizePixel = 0
+EnB.Font = Enum.Font.SourceSansBold
+EnB.TextSize = 22
+EnB.ZIndex = 3
+EnB.Parent = LangF
+
+local EnC = Instance.new("UICorner")
+EnC.CornerRadius = UDim.new(0,14)
+EnC.Parent = EnB
+
+local VersionLabel = Instance.new("TextLabel")
+VersionLabel.Size = UDim2.new(1,0,0,25)
+VersionLabel.Position = UDim2.new(0,0,1,-35)
+VersionLabel.Text = "Panel v2.0 • 2025"
+VersionLabel.TextColor3 = Color3.fromRGB(120,120,140)
+VersionLabel.BackgroundTransparency = 1
+VersionLabel.Font = Enum.Font.SourceSans
+VersionLabel.TextSize = 11
+VersionLabel.ZIndex = 3
+VersionLabel.Parent = LangF
+
+-- ===== صفحه ۲: لودینگ =====
+local LoadF = Instance.new("Frame")
+LoadF.Size = UDim2.new(0,480,0,340)
+LoadF.Position = UDim2.new(0.5,0,0.5,0)
+LoadF.AnchorPoint = Vector2.new(0.5,0.5)
+LoadF.BackgroundColor3 = Color3.fromRGB(15,15,25)
+LoadF.BorderSizePixel = 0
+LoadF.Visible = false
+LoadF.Parent = SG
+
+local LoadC = Instance.new("UICorner")
+LoadC.CornerRadius = UDim.new(0,18)
+LoadC.Parent = LoadF
+
+local LoadBG = Instance.new("Frame")
+LoadBG.Size = UDim2.new(1,0,1,0)
+LoadBG.BackgroundColor3 = Color3.fromRGB(20,20,35)
+LoadBG.BorderSizePixel = 0
+LoadBG.ZIndex = 0
+LoadBG.Parent = LoadF
+
+local LoadBGC = Instance.new("UICorner")
+LoadBGC.CornerRadius = UDim.new(0,18)
+LoadBGC.Parent = LoadBG
+local Spin = Instance.new("ImageLabel")
+Spin.Size = UDim2.new(0,90,0,90)
+Spin.Position = UDim2.new(0.5,-45,0,45)
+Spin.BackgroundTransparency = 1
+Spin.Image = "rbxassetid://4965945816"
+Spin.ImageColor3 = Color3.fromRGB(0,200,255)
+Spin.ZIndex = 3
+Spin.Parent = LoadF
+
+spawn(function()
+    while LoadF.Parent do
+        Spin.Rotation = Spin.Rotation + 4
+        wait(0.03)
+    end
+end)
+
+local WellT = Instance.new("TextLabel")
+WellT.Size = UDim2.new(1,-20,0,35)
+WellT.Position = UDim2.new(0,10,0,175)
+WellT.Text = "به آپدیت ۲.۰ خوش آمدید"
+WellT.TextColor3 = Color3.fromRGB(255,255,255)
+WellT.BackgroundTransparency = 1
+WellT.Font = Enum.Font.SourceSansBold
+WellT.TextSize = 22
+WellT.ZIndex = 3
+WellT.Parent = LoadF
+
+local SorT = Instance.new("TextLabel")
+SorT.Size = UDim2.new(1,-20,0,25)
+SorT.Position = UDim2.new(0,10,0,212)
+SorT.Text = "بابت تاخیر عذر می‌خواهیم"
+SorT.TextColor3 = Color3.fromRGB(180,180,200)
+SorT.BackgroundTransparency = 1
+SorT.Font = Enum.Font.SourceSans
+SorT.TextSize = 14
+SorT.ZIndex = 3
+SorT.Parent = LoadF
+
+local PB = Instance.new("Frame")
+PB.Size = UDim2.new(1,-60,0,8)
+PB.Position = UDim2.new(0,30,0,260)
+PB.BackgroundColor3 = Color3.fromRGB(40,40,55)
+PB.BorderSizePixel = 0
+PB.ZIndex = 3
+PB.Parent = LoadF
+
+local PBC = Instance.new("UICorner")
+PBC.CornerRadius = UDim.new(1,0)
+PBC.Parent = PB
+
+local PF = Instance.new("Frame")
+PF.Size = UDim2.new(0,0,1,0)
+PF.BackgroundColor3 = Color3.fromRGB(0,200,255)
+PF.BorderSizePixel = 0
+PF.ZIndex = 4
+PF.Parent = PB
+
+local PFC = Instance.new("UICorner")
+PFC.CornerRadius = UDim.new(1,0)
+PFC.Parent = PF
+
+local PFGrad = Instance.new("UIGradient")
+PFGrad.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(0,200,255)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(150,0,255))
+})
+PFGrad.Parent = PF
+
+local PctT = Instance.new("TextLabel")
+PctT.Size = UDim2.new(1,-20,0,25)
+PctT.Position = UDim2.new(0,10,0,278)
+PctT.Text = "0%"
+PctT.TextColor3 = Color3.fromRGB(0,200,255)
+PctT.BackgroundTransparency = 1
+PctT.Font = Enum.Font.SourceSansBold
+PctT.TextSize = 15
+PctT.ZIndex = 3
+PctT.Parent = LoadF
+
+local LoadStatus = Instance.new("TextLabel")
+LoadStatus.Size = UDim2.new(1,-20,0,20)
+LoadStatus.Position = UDim2.new(0,10,0,308)
+LoadStatus.Text = "در حال آماده‌سازی..."
+LoadStatus.TextColor3 = Color3.fromRGB(200,200,220)
+LoadStatus.BackgroundTransparency = 1
+LoadStatus.Font = Enum.Font.SourceSans
+LoadStatus.TextSize = 12
+LoadStatus.ZIndex = 3
+LoadStatus.Parent = LoadF
+
+-- ===== صفحه ۳: رمز =====
+local LogF = Instance.new("Frame")
+LogF.Size = UDim2.new(0,400,0,230)
+LogF.Position = UDim2.new(0.5,0,0.5,0)
+LogF.AnchorPoint = Vector2.new(0.5,0.5)
+LogF.BackgroundColor3 = Color3.fromRGB(25,25,40)
+LogF.BorderSizePixel = 0
+LogF.Visible = false
+LogF.Parent = SG
+
+local LogC = Instance.new("UICorner")
+LogC.CornerRadius = UDim.new(0,16)
+LogC.Parent = LogF
+
+local LogIcon = Instance.new("TextLabel")
+LogIcon.Size = UDim2.new(1,0,0,40)
+LogIcon.Position = UDim2.new(0,0,0,15)
+LogIcon.Text = "🔒"
+LogIcon.TextColor3 = Color3.fromRGB(0,200,255)
+LogIcon.BackgroundTransparency = 1
+LogIcon.TextSize = 35
+LogIcon.ZIndex = 3
+LogIcon.Parent = LogF
+
+local LogT = Instance.new("TextLabel")
+LogT.Size = UDim2.new(1,-20,0,30)
+LogT.Position = UDim2.new(0,10,0,60)
+LogT.Text = "رمز پنل را وارد کنید"
+LogT.TextColor3 = Color3.fromRGB(255,255,255)
+LogT.BackgroundTransparency = 1
+LogT.Font = Enum.Font.SourceSansBold
+LogT.TextSize = 17
+LogT.ZIndex = 3
+LogT.Parent = LogF
+
+local PB2 = Instance.new("TextBox")
+PB2.Size = UDim2.new(0.85,0,0,42)
+PB2.Position = UDim2.new(0.075,0,0,100)
+PB2.BackgroundColor3 = Color3.fromRGB(40,40,55)
+PB2.TextColor3 = Color3.fromRGB(255,255,255)
+PB2.PlaceholderText = "رمز را وارد کنید..."
+PB2.PlaceholderColor3 = Color3.fromRGB(140,140,160)
+PB2.Text = ""
+PB2.Font = Enum.Font.SourceSans
+PB2.TextSize = 15
+PB2.BorderSizePixel = 0
+PB2.ClearTextOnFocus = false
+PB2.ZIndex = 3
+PB2.Parent = LogF
+
+local PB2C = Instance.new("UICorner")
+PB2C.CornerRadius = UDim.new(0,8)
+PB2C.Parent = PB2
+local LB = Instance.new("TextButton")
+LB.Size = UDim2.new(0.85,0,0,42)
+LB.Position = UDim2.new(0.075,0,0,152)
+LB.Text = "تایید"
+LB.TextColor3 = Color3.fromRGB(255,255,255)
+LB.BackgroundColor3 = Color3.fromRGB(0,150,200)
+LB.BorderSizePixel = 0
+LB.Font = Enum.Font.SourceSansBold
+LB.TextSize = 16
+LB.ZIndex = 3
+LB.Parent = LogF
+
+local LBC = Instance.new("UICorner")
+LBC.CornerRadius = UDim.new(0,8)
+LBC.Parent = LB
+
+local LErr = Instance.new("TextLabel")
+LErr.Size = UDim2.new(0.85,0,0,20)
+LErr.Position = UDim2.new(0.075,0,0,200)
+LErr.Text = ""
+LErr.TextColor3 = Color3.fromRGB(255,80,80)
+LErr.BackgroundTransparency = 1
+LErr.Font = Enum.Font.SourceSansBold
+LErr.TextSize = 13
+LErr.ZIndex = 3
+LErr.Parent = LogF
+
+-- ===== صفحه ۴: پنل اصلی =====
+local MF = Instance.new("Frame")
+MF.Size = UDim2.new(0,620,0,560)
+MF.Position = UDim2.new(1,-640,0,20)
+MF.BackgroundColor3 = Color3.fromRGB(15,15,25)
+MF.BorderSizePixel = 0
+MF.Visible = false
+MF.ClipsDescendants = true
+MF.Parent = SG
+
+local MC = Instance.new("UICorner")
+MC.CornerRadius = UDim.new(0,14)
+MC.Parent = MF
+
+local MFBG = Instance.new("Frame")
+MFBG.Size = UDim2.new(1,0,1,0)
+MFBG.BackgroundColor3 = Color3.fromRGB(20,20,40)
+MFBG.BorderSizePixel = 0
+MFBG.ZIndex = 0
+MFBG.Parent = MF
+
+local MFBGC = Instance.new("UICorner")
+MFBGC.CornerRadius = UDim.new(0,14)
+MFBGC.Parent = MFBG
+
+local MFGrad = Instance.new("UIGradient")
+MFGrad.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(25,20,45)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(30,20,50)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(20,30,55))
+})
+MFGrad.Rotation = 135
+MFGrad.Parent = MFBG
+
+local TB = Instance.new("TextButton")
+TB.Size = UDim2.new(1,0,0,42)
+TB.BackgroundColor3 = Color3.fromRGB(10,10,20)
+TB.BackgroundTransparency = 0.4
+TB.BorderSizePixel = 0
+TB.Text = ""
+TB.AutoButtonColor = false
+TB.ZIndex = 2
+TB.Parent = MF
+
+local TBC = Instance.new("UICorner")
+TBC.CornerRadius = UDim.new(0,14)
+TBC.Parent = TB
+
+local TBLogo = Instance.new("TextLabel")
+TBLogo.Size = UDim2.new(0,35,1,0)
+TBLogo.Position = UDim2.new(0,10,0,0)
+TBLogo.Text = "⚡"
+TBLogo.TextColor3 = Color3.fromRGB(0,200,255)
+TBLogo.BackgroundTransparency = 1
+TBLogo.TextSize = 22
+TBLogo.ZIndex = 3
+TBLogo.Parent = TB
+
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(0.5,0,1,0)
+Title.Position = UDim2.new(0,50,0,0)
+Title.Text = "پنل اسکریپت‌ها"
+Title.TextColor3 = Color3.fromRGB(255,255,255)
+Title.BackgroundTransparency = 1
+Title.Font = Enum.Font.SourceSansBold
+Title.TextSize = 17
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.ZIndex = 3
+Title.Parent = TB
+
+local ExitB = Instance.new("TextButton")
+ExitB.Size = UDim2.new(0,30,0,30)
+ExitB.Position = UDim2.new(1,-40,0,6)
+ExitB.Text = "X"
+ExitB.TextColor3 = Color3.fromRGB(255,255,255)
+ExitB.BackgroundColor3 = Color3.fromRGB(220,60,60)
+ExitB.BorderSizePixel = 0
+ExitB.Font = Enum.Font.SourceSansBold
+ExitB.TextSize = 15
+ExitB.ZIndex = 3
+ExitB.Parent = TB
+
+local ExitC = Instance.new("UICorner")
+ExitC.CornerRadius = UDim.new(0,7)
+ExitC.Parent = ExitB
+
+local MinB = Instance.new("TextButton")
+MinB.Size = UDim2.new(0,30,0,30)
+MinB.Position = UDim2.new(1,-75,0,6)
+MinB.Text = "−"
+MinB.TextColor3 = Color3.fromRGB(255,255,255)
+MinB.TextSize = 20
+MinB.BackgroundColor3 = Color3.fromRGB(70,70,90)
+MinB.BorderSizePixel = 0
+MinB.Font = Enum.Font.SourceSansBold
+MinB.ZIndex = 3
+MinB.Parent = TB
+
+local MinC = Instance.new("UICorner")
+MinC.CornerRadius = UDim.new(0,7)
+MinC.Parent = MinB
+
+local MusicB = Instance.new("TextButton")
+MusicB.Size = UDim2.new(0,60,0,30)
+MusicB.Position = UDim2.new(1,-140,0,6)
+MusicB.Text = "🎵 پلی"
+MusicB.TextColor3 = Color3.fromRGB(255,255,255)
+MusicB.BackgroundColor3 = Color3.fromRGB(0,170,80)
+MusicB.BorderSizePixel = 0
+MusicB.Font = Enum.Font.SourceSansBold
+MusicB.TextSize = 12
+MusicB.ZIndex = 3
+MusicB.Parent = TB
+
+local MusicC = Instance.new("UICorner")
+MusicC.CornerRadius = UDim.new(0,7)
+MusicC.Parent = MusicB
+local StopB = Instance.new("TextButton")
+StopB.Size = UDim2.new(0,60,0,30)
+StopB.Position = UDim2.new(1,-205,0,6)
+StopB.Text = "⏹️ استاپ"
+StopB.TextColor3 = Color3.fromRGB(255,255,255)
+StopB.BackgroundColor3 = Color3.fromRGB(200,60,60)
+StopB.BorderSizePixel = 0
+StopB.Font = Enum.Font.SourceSansBold
+StopB.TextSize = 12
+StopB.ZIndex = 3
+StopB.Parent = TB
+
+local StopC = Instance.new("UICorner")
+StopC.CornerRadius = UDim.new(0,7)
+StopC.P
