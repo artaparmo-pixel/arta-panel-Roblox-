@@ -1,5 +1,5 @@
 -- ==============================================
--- ===== پنل اصلی با رمز و اهنگ و استوپ اهنگ =====
+-- ===== پنل اصلی - ۲۵ اسکریپت =====
 -- ==============================================
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
@@ -10,7 +10,7 @@ local HttpService = game:GetService("HttpService")
 local LocalPlayer = Players.LocalPlayer
 
 HttpService.HttpEnabled = true
-print("===== پنل اصلی شروع شد =====")
+print("پنل شروع شد")
 
 local Password = "artapanel1234"
 local MusicId = 133732492604303
@@ -18,34 +18,12 @@ local MusicSound = nil
 local isMusicLoop = false
 local loopConn = nil
 
--- ⚠️ اسکریپت‌های پنل
 local HackNames = {
-    "پک دنس",
-    "F3X Crab",
-    "کنترل نوب با F3X",
-    "۹۹ نایت",
-    "بکدور ۱",
-    "بکدور ۲",
-    "بنگ",
-    "بروکهاون",
-    "بن همر",
-    "فیلینگ",
-    "هک ادمین پنل",
-    "F3X توپ پنل",
-    "پرو کیک پنل",
-    "SCP R6",
-    "کوچیک کردن وسیله",
-    "کشتن همه با شمشیر",
-    "فحش بدون سانسور",
-    "پرچم نازی",
-    "sky box f3x",
-    "ریل",
-    "اهنگ بعضی از بازی ها کار میده",
-    "بتولز کنترل پارت سروساید",
-    "ایم بات(جز زیوالز)",
-    "tea tower",
-    "کپی گیم(pc)",
-    "wal hop"
+    "پک دنس", "F3X Crab", "کنترل نوب", "۹۹ نایت", "بکدور ۱",
+    "بکدور ۲", "بنگ", "بروکهاون", "بن همر", "فیلینگ",
+    "هک ادمین", "F3X توپ", "پرو کیک", "SCP R6", "کوچیک کن",
+    "کشتن همه", "فحش", "نازی", "sky box", "ریل",
+    "اهنگ", "بتولز", "ایم بات", "tea tower", "wal hop"
 }
 
 local HackLinks = {
@@ -73,13 +51,14 @@ local HackLinks = {
     "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/btools%20contorol%20part",
     "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/aim%20bot",
     "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/scan%20tea%20tower",
-    "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/cope%20game",
     "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/wall%20hob"
-}local SkyCommands = {
+}
+
+local SkyCommands = {
     {Name = "اهنگ", Cmd = {";music 133732492604303", ";volume 10"}},
     {Name = "دکل", Cmd = {";skybox 91804512111491"}},
     {Name = "سیگار", Cmd = {";script require(122168186720709).roko(\"Arta139296\")"}},
-    {Name = "بمب اتم", Cmd = {";script require(4867426485):SD2(\"Arta139296\")"}},
+{Name = "بمب اتم", Cmd = {";script require(4867426485):SD2(\"Arta139296\")"}},
     {Name = "اهنگ ۲", Cmd = {";music 6129291390", ";volume 10"}},
     {Name = "اهنگ ۳", Cmd = {";music 85390427326662", ";volume 10", ";pitch 0.10"}},
     {Name = "آهنگ ۴", Cmd = {";music 1839246711", ";volume 10"}},
@@ -117,13 +96,6 @@ local function SendChat(msg)
             chat.SayMessageRequest:FireServer(msg, "All")
         end
     end)
-    pcall(function()
-        local TextChatService = game:GetService("TextChatService")
-        if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
-            local channel = TextChatService.TextChannels.RBXGeneral
-            if channel then channel:SendAsync(msg) end
-        end
-    end)
 end
 
 local function FetchScript(link)
@@ -146,7 +118,7 @@ ScreenGui.Name = "Panel"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = CoreGui
 
--- ===== صفحه رمز =====
+-- صفحه رمز
 local LoginFrame = Instance.new("Frame")
 LoginFrame.Size = UDim2.new(0, 350, 0, 180)
 LoginFrame.Position = UDim2.new(0.5, -175, 0.5, -90)
@@ -160,8 +132,7 @@ LoginCorner.Parent = LoginFrame
 
 local LoginTitle = Instance.new("TextLabel")
 LoginTitle.Size = UDim2.new(1, 0, 0, 35)
-LoginTitle.Position = UDim2.new(0, 0, 0, 0)
-LoginTitle.Text = "رمز پنل را واردکنید"
+LoginTitle.Text = "رمز پنل را وارد کنید"
 LoginTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
 LoginTitle.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
 LoginTitle.BorderSizePixel = 0
@@ -201,8 +172,7 @@ LoginError.BackgroundTransparency = 1
 LoginError.Font = Enum.Font.SourceSans
 LoginError.TextSize = 14
 LoginError.Parent = LoginFrame
-
--- ===== پنل اصلی =====
+-- پنل اصلی
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0, 560, 0, 530)
 MainFrame.Position = UDim2.new(1, -580, 0, 20)
@@ -228,15 +198,19 @@ Title.Text = "پنل اسکریپت‌ها"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.BackgroundTransparency = 1
 Title.Font = Enum.Font.SourceSansBold
-Title.TextSize = 18
+Title.TextSize = 16
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = TitleBar
 
-local ExitBtn = Instance.new("ImageButton")
+local ExitBtn = Instance.new("TextButton")
 ExitBtn.Size = UDim2.new(0, 30, 0, 30)
 ExitBtn.Position = UDim2.new(1, -40, 0, 2)
-ExitBtn.BackgroundTransparency = 1
-ExitBtn.Image = "rbxassetid://91804512111491"
+ExitBtn.Text = "X"
+ExitBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ExitBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+ExitBtn.BorderSizePixel = 0
+ExitBtn.Font = Enum.Font.SourceSansBold
+ExitBtn.TextSize = 16
 ExitBtn.Parent = TitleBar
 
 local MinBtn = Instance.new("TextButton")
@@ -280,7 +254,6 @@ TabFrame.Parent = MainFrame
 
 local Tab1 = Instance.new("TextButton")
 Tab1.Size = UDim2.new(0.5, -1, 1, 0)
-Tab1.Position = UDim2.new(0, 0, 0, 0)
 Tab1.Text = "اسکریپت هک"
 Tab1.TextColor3 = Color3.fromRGB(255, 255, 255)
 Tab1.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
@@ -292,13 +265,14 @@ Tab1.Parent = TabFrame
 local Tab2 = Instance.new("TextButton")
 Tab2.Size = UDim2.new(0.5, -1, 1, 0)
 Tab2.Position = UDim2.new(0.5, 1, 0, 0)
-Tab2.Text = "دکل و هوا"
+Tab2.Text = "دکال و آهنگ"
 Tab2.TextColor3 = Color3.fromRGB(255, 255, 255)
 Tab2.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
 Tab2.BorderSizePixel = 0
 Tab2.Font = Enum.Font.SourceSansBold
 Tab2.TextSize = 16
 Tab2.Parent = TabFrame
+
 local HackContent = Instance.new("ScrollingFrame")
 HackContent.Size = UDim2.new(1, -10, 0, 395)
 HackContent.Position = UDim2.new(0, 5, 0, 75)
@@ -306,7 +280,6 @@ HackContent.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
 HackContent.BorderSizePixel = 0
 HackContent.ScrollBarThickness = 6
 HackContent.CanvasSize = UDim2.new(0, 0, 0, 0)
-HackContent.ScrollingDirection = Enum.ScrollingDirection.Y
 HackContent.Parent = MainFrame
 
 local SkyContent = Instance.new("ScrollingFrame")
@@ -316,21 +289,13 @@ SkyContent.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
 SkyContent.BorderSizePixel = 0
 SkyContent.ScrollBarThickness = 6
 SkyContent.CanvasSize = UDim2.new(0, 0, 0, 0)
-SkyContent.ScrollingDirection = Enum.ScrollingDirection.Y
 SkyContent.Visible = false
 SkyContent.Parent = MainFrame
-
 local function MakeHackBtns()
-    local cols = 5
-    local w = 0.2
-    local h = 26
-    local gap = 3
-    local y = 4
-    
+    local cols, w, h, gap, y = 5, 0.2, 28, 4, 5
     for i = 1, #HackNames do
         local col = (i - 1) % cols
         local row = math.floor((i - 1) / cols)
-        
         local btn = Instance.new("TextButton")
         btn.Size = UDim2.new(w, -gap, 0, h)
         btn.Position = UDim2.new(col * w + 0.005, 0, 0, y + row * (h + gap))
@@ -339,19 +304,19 @@ local function MakeHackBtns()
         btn.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
         btn.BorderSizePixel = 0
         btn.Font = Enum.Font.SourceSans
-        btn.TextSize = 9
+        btn.TextSize = 10
         btn.TextWrapped = true
         btn.Parent = HackContent
-        
         local corner = Instance.new("UICorner")
-        corner.CornerRadius = UDim.new(0, 5)
+        corner.CornerRadius = UDim.new(0, 6)
         corner.Parent = btn
-        
+        local nm = HackNames[i]
+        local lk = HackLinks[i]
         btn.MouseButton1Click:Connect(function()
             btn.Text = "..."
             btn.BackgroundColor3 = Color3.fromRGB(200, 150, 50)
             spawn(function()
-                local ok, res = FetchScript(HackLinks[i])
+                local ok, res = FetchScript(lk)
                 if ok and res then
                     local execOk = pcall(function() loadstring(res)() end)
                     if execOk then
@@ -368,27 +333,20 @@ local function MakeHackBtns()
                     btn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
                     wait(2)
                 end
-                btn.Text = HackNames[i]
+                btn.Text = nm
                 btn.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
             end)
         end)
     end
-    
     local rows = math.ceil(#HackNames / cols)
     HackContent.CanvasSize = UDim2.new(0, 0, 0, y + rows * (h + gap) + 10)
 end
 
 local function MakeSkyBtns()
-    local cols = 5
-    local w = 0.2
-    local h = 26
-    local gap = 3
-    local y = 4
-    
+    local cols, w, h, gap, y = 5, 0.2, 28, 4, 5
     for i = 1, #SkyCommands do
         local col = (i - 1) % cols
         local row = math.floor((i - 1) / cols)
-        
         local btn = Instance.new("TextButton")
         btn.Size = UDim2.new(w, -gap, 0, h)
         btn.Position = UDim2.new(col * w + 0.005, 0, 0, y + row * (h + gap))
@@ -397,31 +355,30 @@ local function MakeSkyBtns()
         btn.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
         btn.BorderSizePixel = 0
         btn.Font = Enum.Font.SourceSans
-        btn.TextSize = 9
+        btn.TextSize = 10
         btn.TextWrapped = true
         btn.Parent = SkyContent
-        
         local corner = Instance.new("UICorner")
-        corner.CornerRadius = UDim.new(0, 5)
+        corner.CornerRadius = UDim.new(0, 6)
         corner.Parent = btn
-        
+        local nm = SkyCommands[i].Name
+        local cm = SkyCommands[i].Cmd
         btn.MouseButton1Click:Connect(function()
             btn.Text = "..."
             btn.BackgroundColor3 = Color3.fromRGB(200, 150, 50)
-spawn(function()
-                for _, cmd in ipairs(SkyCommands[i].Cmd) do
+            spawn(function()
+                for _, cmd in ipairs(cm) do
                     SendChat(cmd)
                     wait(0.3)
                 end
                 btn.Text = "✓"
                 btn.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
                 wait(1.5)
-                btn.Text = SkyCommands[i].Name
+                btn.Text = nm
                 btn.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
             end)
         end)
     end
-    
     local rows = math.ceil(#SkyCommands / cols)
     SkyContent.CanvasSize = UDim2.new(0, 0, 0, y + rows * (h + gap) + 10)
 end
@@ -442,7 +399,6 @@ local function SwitchTab(tab)
         SkyContent.Visible = true
     end
 end
-
 Tab1.MouseButton1Click:Connect(function() SwitchTab(1) end)
 Tab2.MouseButton1Click:Connect(function() SwitchTab(2) end)
 
@@ -538,4 +494,4 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
-print("===== پنل اصلی با رمز artapanel1234 آماده است! =====")
+print("پنل آماده است")
