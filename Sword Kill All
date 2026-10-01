@@ -1,0 +1,8 @@
+--[[
+Get a Sword Tools First
+you don't have a tool Sword
+-
+script by @us7a5 on Roblox
+]]--
+
+loadstring(game:HttpGet("https://raw.githubusercontent.com/US-USA/Arabscript/refs/heads/master/Sword_kill_all.lua"))()
