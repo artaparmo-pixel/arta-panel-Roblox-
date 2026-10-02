@@ -1,0 +1,614 @@
+-- ==============================================
+-- ===== ⚡ ARTA MASTER ULTRA PANEL (PART 1) ⚡ =====
+-- ==============================================
+
+local function protect()
+    pcall(function()
+        if getscriptbytecode then getscriptbytecode = function(...) while true do end end end
+        if decompile then decompile = function(...) while true do end end end
+    end)
+end
+protect()
+
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local SoundService = game:GetService("SoundService")
+local RunService = game:GetService("RunService")
+local StarterGui = game:GetService("StarterGui")
+
+local LP = Players.LocalPlayer
+
+pcall(function()
+    local c = game:GetService("CoreGui"):FindFirstChild("ArtaMasterGui")
+    if c then c:Destroy() end
+end)
+
+local SafeParent = game:GetService("CoreGui")
+if gethui then
+    local ok, res = pcall(gethui)
+    if ok and res then SafeParent = res end
+end
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "ArtaMasterGui"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.IgnoreGuiInset = true
+ScreenGui.DisplayOrder = 999999
+ScreenGui.Parent = SafeParent
+
+local isMobile = UserInputService.TouchEnabled and not UserInputService.MouseEnabled
+local panelW, panelH
+if isMobile then
+    panelW = math.min(workspace.CurrentCamera.ViewportSize.X * 0.92, 400)
+    panelH = math.min(workspace.CurrentCamera.ViewportSize.Y * 0.75, 500)
+else
+    panelW = math.min(workspace.CurrentCamera.ViewportSize.X * 0.4, 420)
+    panelH = math.min(workspace.CurrentCamera.ViewportSize.Y * 0.7, 400)
+end
+
+local COLORS = {
+    main = Color3.fromRGB(20, 10, 20),
+    header = Color3.fromRGB(180, 20, 80),
+    accent = Color3.fromRGB(255, 80, 150),
+    darker = Color3.fromRGB(15, 5, 15),
+    button = Color3.fromRGB(50, 20, 40),
+    buttonHover = Color3.fromRGB(80, 30, 60),
+    text = Color3.fromRGB(255, 220, 240),
+    textDim = Color3.fromRGB(180, 140, 160),
+}
+
+local SKIN_DECAL = "rbxassetid://94436187842563"
+local CORRECT_PASSWORD = "Artapanel"
+
+local function corner(inst, r)
+    local c = Instance.new("UICorner")
+    c.CornerRadius = UDim.new(0, r or 12)
+    c.Parent = inst
+    return c
+end
+
+local function stroke(inst, color, t, tr)
+    local s = Instance.new("UIStroke")
+    s.Color = color or COLORS.accent
+    s.Thickness = t or 1
+    s.Transparency = tr or 0.5
+    s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    s.Parent = inst
+    return s
+end
+
+local function tween(inst, info, props)
+    local t = TweenService:Create(inst, info, props)
+    t:Play()
+    return t
+end
+
+local function notify(title, text)
+    pcall(function()
+        StarterGui:SetCore("SendNotification", {
+            Title = title,
+            Text = text,
+            Duration = 3
+        })
+    end)
+end
+
+-- ==============================================
+-- ===== BLUR EFFECT & SOUND =====
+-- ==============================================
+local blur = Instance.new("BlurEffect")
+blur.Size = 14
+blur.Parent = game:GetService("Lighting")
+
+local BgSound = Instance.new("Sound")
+BgSound.SoundId = "rbxassetid://1847661821"
+BgSound.Volume = 0.5
+BgSound.Looped = true
+BgSound.Parent = SoundService
+
+-- ==============================================
+-- ===== LOGIN SYSTEM =====
+-- ==============================================
+local LoginFrame = Instance.new("ImageLabel")
+LoginFrame.Name = "LoginFrame"
+LoginFrame.Size = UDim2.new(0, 360, 0, 240)
+LoginFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+LoginFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+LoginFrame.Image = SKIN_DECAL
+LoginFrame.BackgroundTransparency = 0.3
+LoginFrame.BackgroundColor3 = COLORS.main
+LoginFrame.ScaleType = Enum.ScaleType.Crop
+LoginFrame.ClipsDescendants = true
+LoginFrame.ZIndex = 200
+LoginFrame.Parent = ScreenGui
+corner(LoginFrame, 16)
+stroke(LoginFrame, COLORS.accent, 2, 0.3)
+local LoginTitle = Instance.new("TextLabel")
+LoginTitle.Size = UDim2.new(1, 0, 0, 40)
+LoginTitle.Position = UDim2.new(0, 0, 0, 15)
+LoginTitle.BackgroundTransparency = 1
+LoginTitle.Text = "⚡ ARTA PANEL LOGIN ⚡"
+LoginTitle.TextColor3 = COLORS.text
+LoginTitle.TextSize = 18
+LoginTitle.Font = Enum.Font.GothamBold
+LoginTitle.ZIndex = 201
+LoginTitle.Parent = LoginFrame
+
+local PassBox = Instance.new("TextBox")
+PassBox.Size = UDim2.new(0.8, 0, 0, 42)
+PassBox.Position = UDim2.new(0.1, 0, 0.38, 0)
+PassBox.BackgroundColor3 = COLORS.darker
+PassBox.BackgroundTransparency = 0.4
+PassBox.PlaceholderText = "رمز عبور را وارد کنید..."
+PassBox.PlaceholderColor3 = COLORS.textDim
+PassBox.Text = ""
+PassBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+PassBox.TextSize = 14
+PassBox.Font = Enum.Font.Gotham
+PassBox.ZIndex = 201
+PassBox.Parent = LoginFrame
+corner(PassBox, 10)
+
+local LoginBtn = Instance.new("TextButton")
+LoginBtn.Size = UDim2.new(0.8, 0, 0, 42)
+LoginBtn.Position = UDim2.new(0.1, 0, 0.68, 0)
+LoginBtn.BackgroundColor3 = COLORS.header
+LoginBtn.BackgroundTransparency = 0.2
+LoginBtn.Text = "ورود به سیستم"
+LoginBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+LoginBtn.TextSize = 16
+LoginBtn.Font = Enum.Font.GothamBold
+LoginBtn.ZIndex = 201
+LoginBtn.Parent = LoginFrame
+corner(LoginBtn, 10)
+
+-- ==============================================
+-- ===== APOLOGY POPUP =====
+-- ==============================================
+local PopupFrame = Instance.new("Frame")
+PopupFrame.Name = "ApologyPopup"
+PopupFrame.Size = UDim2.new(0, 0, 0, 0)
+PopupFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+PopupFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+PopupFrame.BackgroundColor3 = COLORS.main
+PopupFrame.BackgroundTransparency = 0.2
+PopupFrame.Visible = false
+PopupFrame.ZIndex = 200
+PopupFrame.Parent = ScreenGui
+corner(PopupFrame, 16)
+stroke(PopupFrame, COLORS.accent, 2, 0.3)
+
+local ApologyLabel = Instance.new("TextLabel")
+ApologyLabel.Size = UDim2.new(0.9, 0, 0, 90)
+ApologyLabel.Position = UDim2.new(0.05, 0, 0.08, 0)
+ApologyLabel.BackgroundTransparency = 1
+ApologyLabel.Text = "❤️ بابت تاخیر در آپدیت عذر می‌خواهیم!\n\nبرای ورود به پنل اصلی دکمه زیر را بزنید."
+ApologyLabel.TextColor3 = COLORS.text
+ApologyLabel.TextSize = 14
+ApologyLabel.Font = Enum.Font.Gotham
+ApologyLabel.TextWrapped = true
+ApologyLabel.ZIndex = 201
+ApologyLabel.Parent = PopupFrame
+
+local ConfirmBtn = Instance.new("TextButton")
+ConfirmBtn.Size = UDim2.new(0.8, 0, 0, 42)
+ConfirmBtn.Position = UDim2.new(0.1, 0, 0.68, 0)
+ConfirmBtn.BackgroundColor3 = COLORS.header
+ConfirmBtn.BackgroundTransparency = 0.2
+ConfirmBtn.Text = "تایید و ادامه"
+ConfirmBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ConfirmBtn.TextSize = 15
+ConfirmBtn.Font = Enum.Font.GothamBold
+ConfirmBtn.ZIndex = 201
+ConfirmBtn.Parent = PopupFrame
+corner(ConfirmBtn, 10)
+
+-- ==============================================
+-- ===== LOADING FRAME =====
+-- ==============================================
+local LoadingFrame = Instance.new("Frame")
+LoadingFrame.Size = UDim2.new(1, 0, 1, 0)
+LoadingFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+LoadingFrame.BorderSizePixel = 0
+LoadingFrame.ZIndex = 100
+LoadingFrame.Visible = false
+LoadingFrame.Parent = ScreenGui
+
+local LoadDecal = Instance.new("ImageLabel")
+LoadDecal.Size = UDim2.new(0, 120, 0, 120)
+LoadDecal.AnchorPoint = Vector2.new(0.5, 0.5)
+LoadDecal.Position = UDim2.new(0.5, 0, 0.5, -60)
+LoadDecal.BackgroundTransparency = 1
+LoadDecal.Image = SKIN_DECAL
+LoadDecal.ZIndex = 102
+LoadDecal.Parent = LoadingFrame
+corner(LoadDecal, 60)
+
+task.spawn(function()
+    while LoadDecal and LoadDecal.Parent do
+        LoadDecal.Rotation = (LoadDecal.Rotation + 3) % 360
+        RunService.Heartbeat:Wait()
+    end
+end)
+
+local LoadTitle = Instance.new("TextLabel")
+LoadTitle.Size = UDim2.new(1, 0, 0, 40)
+LoadTitle.AnchorPoint = Vector2.new(0.5, 0.5)
+LoadTitle.Position = UDim2.new(0.5, 0, 0.5, 30)
+LoadTitle.BackgroundTransparency = 1
+LoadTitle.Text = "Arta Panel"
+LoadTitle.Font = Enum.Font.GothamBlack
+LoadTitle.TextSize = 28
+LoadTitle.TextColor3 = COLORS.accent
+LoadTitle.ZIndex = 102
+LoadTitle.Parent = LoadingFrame
+local TapBtn = Instance.new("TextButton")
+TapBtn.Size = UDim2.new(0, 150, 0, 45)
+TapBtn.AnchorPoint = Vector2.new(0.5, 0.5)
+TapBtn.Position = UDim2.new(0.5, 0, 0.5, 100)
+TapBtn.BackgroundColor3 = COLORS.header
+TapBtn.BorderSizePixel = 0
+TapBtn.Text = "Tap here"
+TapBtn.Font = Enum.Font.GothamBold
+TapBtn.TextSize = 18
+TapBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+TapBtn.AutoButtonColor = false
+TapBtn.ZIndex = 103
+TapBtn.Parent = LoadingFrame
+corner(TapBtn, 10)
+stroke(TapBtn, COLORS.accent, 1, 0.4)
+-- ==============================================
+-- ===== ⚡ ARTA MASTER ULTRA PANEL (PART 2) ⚡ =====
+-- ==============================================
+
+-- ==============================================
+-- ===== MAIN PANEL FRAME =====
+-- ==============================================
+local MainFrame = Instance.new("ImageLabel")
+MainFrame.Name = "MainFrame"
+MainFrame.Size = UDim2.new(0, panelW, 0, panelH)
+MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+MainFrame.Image = SKIN_DECAL
+MainFrame.BackgroundTransparency = 0.25
+MainFrame.BackgroundColor3 = COLORS.main
+MainFrame.ScaleType = Enum.ScaleType.Crop
+MainFrame.ClipsDescendants = true
+MainFrame.ZIndex = 1
+MainFrame.Visible = false
+MainFrame.Parent = ScreenGui
+corner(MainFrame, 16)
+stroke(MainFrame, COLORS.accent, 2, 0.3)
+
+-- Dragging System
+local dragging, dragInput, dragStart, startPos
+MainFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = MainFrame.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+MainFrame.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        local delta = input.Position - dragStart
+        MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+
+-- Header Bar
+local Header = Instance.new("Frame")
+Header.Size = UDim2.new(1, 0, 0, 40)
+Header.BackgroundColor3 = COLORS.header
+Header.BackgroundTransparency = 0.3
+Header.ZIndex = 2
+Header.Parent = MainFrame
+corner(Header, 12)
+
+local TitleLabel = Instance.new("TextLabel")
+TitleLabel.Size = UDim2.new(0.6, 0, 1, 0)
+TitleLabel.Position = UDim2.new(0, 12, 0, 0)
+TitleLabel.BackgroundTransparency = 1
+TitleLabel.Text = "⚡ Arta Ultra Panel"
+TitleLabel.Font = Enum.Font.GothamBlack
+TitleLabel.TextSize = 16
+TitleLabel.TextColor3 = COLORS.text
+TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+TitleLabel.ZIndex = 3
+TitleLabel.Parent = Header
+
+-- Music Toggle Button
+local MusicBtn = Instance.new("TextButton")
+MusicBtn.Size = UDim2.new(0, 32, 0, 26)
+MusicBtn.Position = UDim2.new(1, -72, 0, 7)
+MusicBtn.BackgroundColor3 = COLORS.button
+MusicBtn.Text = "🔊"
+MusicBtn.Font = Enum.Font.GothamBold
+MusicBtn.TextSize = 14
+MusicBtn.TextColor3 = COLORS.text
+MusicBtn.ZIndex = 3
+MusicBtn.Parent = Header
+corner(MusicBtn, 6)
+
+local musicPlaying = true
+MusicBtn.MouseButton1Click:Connect(function()
+    musicPlaying = not musicPlaying
+    BgSound.Volume = musicPlaying and 0.5 or 0
+    MusicBtn.Text = musicPlaying and "🔊" or "🔇"
+end)
+
+-- Close Button
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Size = UDim2.new(0, 32, 0, 26)
+CloseBtn.Position = UDim2.new(1, -36, 0, 7)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
+CloseBtn.Text = "✕"
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.TextSize = 14
+CloseBtn.TextColor3 = COLORS.text
+CloseBtn.ZIndex = 3
+CloseBtn.Parent = Header
+corner(CloseBtn, 6)
+
+CloseBtn.MouseButton1Click:Connect(function()
+    MainFrame.Visible = false
+    BgSound:Stop()
+end)
+
+-- Category Navigation
+local NavFrame = Instance.new("Frame")
+NavFrame.Size = UDim2.new(1, -16, 0, 32)
+NavFrame.Position = UDim2.new(0, 8, 0, 46)
+NavFrame.BackgroundTransparency = 1
+NavFrame.ZIndex = 2
+NavFrame.Parent = MainFrame
+
+local UIListNav = Instance.new("UIListLayout")
+UIListNav.FillDirection = Enum.FillDirection.Horizontal
+UIListNav.Padding = UDim.new(0, 4)
+UIListNav.HorizontalAlignment = Enum.HorizontalAlignment.Center
+UIListNav.Parent = NavFrame
+-- Content Scroll Area
+local ContentScroll = Instance.new("ScrollingFrame")
+ContentScroll.Size = UDim2.new(1, -16, 1, -86)
+ContentScroll.Position = UDim2.new(0, 8, 0, 82)
+ContentScroll.BackgroundTransparency = 1
+ContentScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+ContentScroll.ScrollBarThickness = 4
+ContentScroll.ScrollBarImageColor3 = COLORS.accent
+ContentScroll.ZIndex = 2
+ContentScroll.Parent = MainFrame
+
+local UIListContent = Instance.new("UIListLayout")
+UIListContent.SortOrder = Enum.SortOrder.LayoutOrder
+UIListContent.Padding = UDim.new(0, 6)
+UIListContent.Parent = ContentScroll
+
+UIListContent:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+    ContentScroll.CanvasSize = UDim2.new(0, 0, 0, UIListContent.AbsoluteContentSize.Y + 10)
+end)
+
+-- ==============================================
+-- ===== SCRIPTS DATABASE (27 SCRIPTS) =====
+-- ==============================================
+local scriptCategories = {
+    {
+        cat = "Admin",
+        scripts = {
+            { name = "Fly Script", code = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEKO-SCRIPTS/Fly/main/Fly"))()' },
+            { name = "Infinite Yield", code = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()' },
+            { name = "Nameless Admin", code = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/filtering-is-dead/nameless-admin/main/Source.lua"))()' },
+            { name = "CMD-X Admin", code = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/CMD-X/CMD-X/master/Source"))()' },
+            { name = "Reviz Admin", code = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/roblox-scripts-1/Reviz-Admin/main/script"))()' },
+            { name = "Fates Admin", code = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/fatesc/fates-admin/main/main.lua"))()' },
+            { name = "Homebrew Admin", code = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Homebrew-Admin/Homebrew-Admin/main/Main.lua"))()' }
+        }
+    },
+    {
+        cat = "Troll",
+        scripts = {
+            { name = "System Broken (Troll)", code = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/H20George/SystemBroken/main/script"))()' },
+            { name = "Jerk Off Animation", code = 'loadstring(game:HttpGet("https://pastebin.com/raw/j821422"))()' },
+            { name = "Fling All Players", code = 'loadstring(game:HttpGet("https://pastebin.com/raw/zqyA639M"))()' },
+            { name = "Touch Fling", code = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/03s3/03s3/main/TouchFling"))()' },
+            { name = "FE Ragdoll Engine", code = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/filtering-is-dead/Ragdoll/main/Source.lua"))()' },
+            { name = "Chat Spammer", code = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Filtering-Is-Dead/Chat-Spammer/main/Source.lua"))()' },
+            { name = "Invisible Character", code = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Filtering-Is-Dead/Invisible/main/Source.lua"))()' }
+        }
+    },
+    {
+        cat = "Backdoor",
+        scripts = {
+            { name = "Backdoor.exe v8", code = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/iK4R33m/Backdoor.exe/main/unobfuscated.lua"))()' },
+            { name = "UTG Backdoor Scanner", code = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Filtering-Is-Dead/UTG-Backdoor/main/Source.lua"))()' },
+            { name = "Lalol Hub (Backdoor)", code = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/LalolScripter/Lalol-Hub/main/Main.lua"))()' },
+            { name = "Serpents Backdoor", code = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Filtering-Is-Dead/Serpents/main/Source.lua"))()' },
+{ name = "Vander Hub", code = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Filtering-Is-Dead/Vander/main/Source.lua"))()' },
+            { name = "K00pkidd GUI", code = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Filtering-Is-Dead/K00pkidd/main/Source.lua"))()' }
+        }
+    },
+    {
+        cat = "Misc",
+        scripts = {
+            { name = "Dex Explorer v4", code = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/main/dex.lua"))()' },
+            { name = "Remote Spy (SimpleSpy)", code = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/ex-ser/SimpleSpy/main/SimpleSpy.lua"))()' },
+            { name = "ESP & Wallhack", code = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/ic3w0lf22/Unnamed-ESP/master/UnamedESP.lua"))()' },
+            { name = "Aimbot Universal", code = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Exunys/Aimbot-Script/main/Aimbot.lua"))()' },
+            { name = "Btools (Building Tools)", code = 'Instance.new("HopperBin", game.Players.LocalPlayer.Backpack).BinType = 4' },
+            { name = "Rejoin Game", code = 'game:GetService("TeleportService"):Teleport(game.PlaceId, game.Players.LocalPlayer)' },
+            { name = "Server Hop", code = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/Filtering-Is-Dead/ServerHop/main/Source.lua"))()' }
+        }
+    }
+}
+
+-- Render Category Tabs & Buttons
+local activeTab = nil
+local categoryFrames = {}
+
+for _, category in ipairs(scriptCategories) do
+    local navBtn = Instance.new("TextButton")
+    navBtn.Size = UDim2.new(0, 80, 1, 0)
+    navBtn.BackgroundColor3 = COLORS.button
+    navBtn.Text = category.cat
+    navBtn.Font = Enum.Font.GothamBold
+    navBtn.TextSize = 12
+    navBtn.TextColor3 = COLORS.textDim
+    navBtn.ZIndex = 3
+    navBtn.Parent = NavFrame
+    corner(navBtn, 8)
+    
+    local page = Instance.new("Frame")
+    page.Size = UDim2.new(1, 0, 1, 0)
+    page.BackgroundTransparency = 1
+    page.Visible = false
+    page.Parent = ContentScroll
+    
+    local pageList = Instance.new("UIListLayout")
+    pageList.SortOrder = Enum.SortOrder.LayoutOrder
+    pageList.Padding = UDim.new(0, 6)
+    pageList.Parent = page
+
+    categoryFrames[category.cat] = { button = navBtn, page = page }
+
+    for _, sc in ipairs(category.scripts) do
+        local btn = Instance.new("TextButton")
+        btn.Size = UDim2.new(1, 0, 0, 36)
+        btn.BackgroundColor3 = COLORS.button
+        btn.BackgroundTransparency = 0.4
+        btn.Text = "  ⚡ " .. sc.name
+        btn.Font = Enum.Font.GothamSemibold
+        btn.TextSize = 13
+        btn.TextColor3 = COLORS.text
+        btn.TextXAlignment = Enum.TextXAlignment.Left
+        btn.ZIndex = 3
+        btn.Parent = page
+        corner(btn, 8)
+        stroke(btn, COLORS.accent, 1, 0.7)
+
+        btn.MouseEnter:Connect(function() tween(btn, TweenInfo.new(0.2), { BackgroundTransparency = 0.1 }) end)
+        btn.MouseLeave:Connect(function() tween(btn, TweenInfo.new(0.2), { BackgroundTransparency = 0.4 }) end)
+
+        btn.MouseButton1Click:Connect(function()
+            notify("Arta Panel", "Running: " .. sc.name)
+            task.spawn(function()
+                local s, err = pcall(function() loadstring(sc.code)() end)
+                if not s then notify("Error", tostring(err)) end
+            end)
+        end)
+    end
+
+    navBtn.MouseButton1Click:Connect(function()
+        for catName, tabData in pairs(categoryFrames) do
+            tabData.page.Visible = false
+            tabData.button.BackgroundColor3 = COLORS.button
+            tabData.button.TextColor3 = COLORS.textDim
+        end
+        page.Visible = true
+        navBtn.BackgroundColor3 = COLORS.header
+        navBtn.TextColor3 = COLORS.text
+    end)
+end
+
+-- Info Tab
+local infoBtn = Instance.new("TextButton")
+infoBtn.Size = UDim2.new(0, 60, 1, 0)
+infoBtn.BackgroundColor3 = COLORS.button
+infoBtn.Text = "Info"
+infoBtn.Font = Enum.Font.GothamBold
+infoBtn.TextSize = 12
+infoBtn.TextColor3 = COLORS.textDim
+infoBtn.ZIndex = 3
+infoBtn.Parent = NavFrame
+corner(infoBtn, 8)
+
+local infoPage = Instance.new("Frame")
+infoPage.Size = UDim2.new(1, 0, 1, 0)
+infoPage.BackgroundTransparency = 1
+infoPage.Visible = false
+infoPage.Parent = ContentScroll
+
+local infoLabel = Instance.new("TextLabel")
+infoLabel.Size = UDim2.new(1, 0, 1, 0)
+infoLabel.BackgroundTransparency = 1
+infoLabel.Text = "⚡ Arta Master Panel v3.0\n\n• Designed & Developed by Arta\n• Status: Active & Secured\n• Total Scripts: 27 Features"
+infoLabel.Font = Enum.Font.GothamMedium
+infoLabel.TextSize = 14
+infoLabel.TextColor3 = COLORS.text
+infoLabel.Parent = infoPage
+
+infoBtn.MouseButton1Click:Connect(function()
+    for catName, tabData in pairs(categoryFrames) do
+        tabData.page.Visible = false
+        tabData.button.BackgroundColor3 = COLORS.button
+        tabData.button.TextColor3 = COLORS.textDim
+    end
+    infoPage.Visible = true
+    infoBtn.BackgroundColor3 = COLORS.header
+    infoBtn.TextColor3 = COLORS.text
+end)
+
+-- Default Active Tab
+categoryFrames["Admin"].page.Visible = true
+categoryFrames["Admin"].button.BackgroundColor3 = COLORS.header
+categoryFrames["Admin"].button.TextColor3 = COLORS.text
+
+-- ==============================================
+-- ===== LOGIN & FLOW LOGIC =====
+-- ==============================================
+local function popIn(frame, targetSize)
+    frame.Size = UDim2.new(0, 0, 0, 0)
+    frame.Visible = true
+    tween(frame, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Size = targetSize })
+end
+
+local function popOut(frame, onComplete)
+    local t = tween(frame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { Size = UDim2.new(0, 0, 0, 0) })
+    t.Completed:Connect(function()
+        frame.Visible = false
+        if onComplete then onComplete() end
+    end)
+end
+
+LoginBtn.MouseButton1Click:Connect(function()
+    if PassBox.Text == CORRECT_PASSWORD then
+        popOut(LoginFrame, function()
+            popIn(PopupFrame, UDim2.new(0, 350, 0, 210))
+        end)
+    else
+        local originalPos = LoginFrame.Position
+        for i = 1, 5 do
+            LoginFrame.Position = originalPos + UDim2.new(0, 8, 0, 0)
+            task.wait(0.03)
+            LoginFrame.Position = originalPos - UDim2.new(0, 8, 0, 0)
+            task.wait(0.03)
+        end
+        LoginFrame.Position = originalPos
+        PassBox.Text = ""
+        PassBox.PlaceholderText = "❌ رمز اشتباه است!"
+    end
+end)
+
+ConfirmBtn.MouseButton1Click:Connect(function()
+    popOut(PopupFrame, function()
+        LoadingFrame.Visible = true
+        BgSound:Play()
+    end)
+end)
+
+TapBtn.MouseButton1Click:Connect(function()
+    LoadingFrame.Visible = false
+    tween(blur, TweenInfo.new(0.5), { Size = 0 })
+    MainFrame.Visible = true
+    notify("Arta Panel", "Welcome to Arta Panel!")
+end)
