@@ -1,5 +1,5 @@
 -- ==============================================
--- ===== پنل اصلی - ۲۵ اسکریپت =====
+-- ===== پنل اصلی - ۲۶ اسکریپت =====
 -- ==============================================
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
@@ -23,7 +23,8 @@ local HackNames = {
     "بکدور ۲", "بنگ", "بروکهاون", "بن همر", "فیلینگ",
     "هک ادمین", "F3X توپ", "پرو کیک", "SCP R6", "کوچیک کن",
     "کشتن همه", "فحش", "نازی", "sky box", "ریل",
-    "اهنگ", "بتولز", "ایم بات", "tea tower", "wal hop"
+    "اهنگ", "بتولز", "ایم بات", "tea tower", "wal hop",
+    "پنل آرتا(نسخه جدید)"
 }
 
 local HackLinks = {
@@ -51,18 +52,19 @@ local HackLinks = {
     "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/btools%20contorol%20part",
     "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/aim%20bot",
     "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/scan%20tea%20tower",
-    "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/wall%20hob"
+    "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/wall%20hob",
+    "https://raw.githubusercontent.com/artaparmo-pixel/arta-panel-Roblox-/refs/heads/main/test"
 }
 
 local SkyCommands = {
     {Name = "اهنگ", Cmd = {";music 133732492604303", ";volume 10"}},
-    {Name = "دکل", Cmd = {";skybox 91804512111491"}},
+{Name = "دکل", Cmd = {";skybox 91804512111491"}},
     {Name = "سیگار", Cmd = {";script require(122168186720709).roko(\"Arta139296\")"}},
-{Name = "بمب اتم", Cmd = {";script require(4867426485):SD2(\"Arta139296\")"}},
+    {Name = "بمب اتم", Cmd = {";script require(4867426485):SD2(\"Arta139296\")"}},
     {Name = "اهنگ ۲", Cmd = {";music 6129291390", ";volume 10"}},
     {Name = "اهنگ ۳", Cmd = {";music 85390427326662", ";volume 10", ";pitch 0.10"}},
     {Name = "آهنگ ۴", Cmd = {";music 1839246711", ";volume 10"}},
-    {Name = "استوپ اهنگ", Cmd = {";stop"}}
+    {Name = "استوپ", Cmd = {";stop"}}
 }
 
 local function PlayMusic()
@@ -90,10 +92,22 @@ local function StopMusic()
 end
 
 local function SendChat(msg)
+    -- روش ۱: چت قدیمی
     pcall(function()
         local chat = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents")
         if chat and chat:FindFirstChild("SayMessageRequest") then
             chat.SayMessageRequest:FireServer(msg, "All")
+        end
+    end)
+    
+    -- روش ۲: چت جدید (TextChatService)
+    pcall(function()
+        local TCS = game:GetService("TextChatService")
+        if TCS.ChatVersion == Enum.ChatVersion.TextChatService then
+            local channel = TCS.TextChannels.RBXGeneral
+            if channel then
+                channel:SendAsync(msg)
+            end
         end
     end)
 end
@@ -114,7 +128,7 @@ local function FetchScript(link)
 end
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "Panel"
+ScreenGui.Name = "ArtaMainPanel"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = CoreGui
 
@@ -162,16 +176,15 @@ LoginBtn.BorderSizePixel = 0
 LoginBtn.Font = Enum.Font.SourceSansBold
 LoginBtn.TextSize = 16
 LoginBtn.Parent = LoginFrame
-
 local LoginError = Instance.new("TextLabel")
 LoginError.Size = UDim2.new(0.8, 0, 0, 20)
 LoginError.Position = UDim2.new(0.1, 0, 0.55, 0)
 LoginError.Text = ""
 LoginError.TextColor3 = Color3.fromRGB(255, 50, 50)
 LoginError.BackgroundTransparency = 1
-LoginError.Font = Enum.Font.SourceSans
 LoginError.TextSize = 14
 LoginError.Parent = LoginFrame
+
 -- پنل اصلی
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0, 560, 0, 530)
@@ -281,7 +294,6 @@ HackContent.BorderSizePixel = 0
 HackContent.ScrollBarThickness = 6
 HackContent.CanvasSize = UDim2.new(0, 0, 0, 0)
 HackContent.Parent = MainFrame
-
 local SkyContent = Instance.new("ScrollingFrame")
 SkyContent.Size = UDim2.new(1, -10, 0, 395)
 SkyContent.Position = UDim2.new(0, 5, 0, 75)
@@ -291,6 +303,7 @@ SkyContent.ScrollBarThickness = 6
 SkyContent.CanvasSize = UDim2.new(0, 0, 0, 0)
 SkyContent.Visible = false
 SkyContent.Parent = MainFrame
+
 local function MakeHackBtns()
     local cols, w, h, gap, y = 5, 0.2, 28, 4, 5
     for i = 1, #HackNames do
@@ -385,7 +398,6 @@ end
 
 MakeHackBtns()
 MakeSkyBtns()
-
 local function SwitchTab(tab)
     if tab == 1 then
         Tab1.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
@@ -399,6 +411,7 @@ local function SwitchTab(tab)
         SkyContent.Visible = true
     end
 end
+
 Tab1.MouseButton1Click:Connect(function() SwitchTab(1) end)
 Tab2.MouseButton1Click:Connect(function() SwitchTab(2) end)
 
@@ -494,4 +507,4 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
-print("پنل آماده است")
+print("پنل آماده است - ۲۶ اسکریپت")
